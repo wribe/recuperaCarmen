@@ -4,6 +4,7 @@ import EmpleaDos from "../components/EmpleaDos.vue";
 import TareaS from "../components/TareaS.vue";
 import EstadisTicas from "../components/EstadisTicas.vue";
 import AbouT from "../components/AbouT.vue";
+import AvisoLegal from "../components/AvisoLegal.vue";
 
 const routes = [
     {
@@ -30,6 +31,11 @@ const routes = [
         path: "/about",
         name: "AbouT",
         component: AbouT
+    },
+    {
+        path: "/avisolegal",
+        name: "AvisoLegal",
+        component: AvisoLegal
     }
 ];
 
