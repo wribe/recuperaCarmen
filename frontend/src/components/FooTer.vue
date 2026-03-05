@@ -1,13 +1,13 @@
 <template>
   <footer class="navbar navbar-dark bg-primary position-sticky top-1">
-    <div class="container">
+    <div class="container d-flex flex-grow-1 align-items-center justify-content-center">
       
-      <ul class="list-inline mb-0 d-flex justify-content-end">
+      <ul class="list-inline mb-1 d-flex justify-content-end">
         <router-link to="/avisolegal" target="_blank" class="ms-2 nav-link text-light d-inline me-2">Aviso Legal</router-link>
         <router-link to="/politicaprivacidad" target="_blank" class="ms-2 nav-link text-light d-inline me-2">Política de Cookies</router-link>       
         <li class="list-inline-item"><a href="#" class="ms-2 text-light text-decoration-none">Contacto</a></li>
       </ul>
-      <p class="mb-1 text-light">&copy; {{ new Date().getFullYear() }} Gestion Tarefas.</p>
+      <p class="mx-3 mb-1 text-light">&copy; {{ new Date().getFullYear() }} Gestion Tarefas.</p>
     </div>
   </footer>
 </template>
