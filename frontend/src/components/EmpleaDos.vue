@@ -15,34 +15,34 @@
                     <div class="row g-3">
                         <!-- Nombre -->
                         <div class="col-md-6">
-                            <label for="nombre" class="form-label fw-semibold">Nombre: <span class="text-danger">*</span></label>
-                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre"
-                                class="form-control" :class="{ 'is-invalid': errores.nombre }"
-                                placeholder="Introduce el nombre" />
+                            <label for="nombre" class="form-label fw-semibold">Nombre: <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre" class="form-control"
+                                :class="{ 'is-invalid': errores.nombre }" placeholder="Introduce el nombre" />
                             <div v-if="errores.nombre" class="invalid-feedback">{{ errores.nombre }}</div>
                         </div>
 
                         <!-- Apellidos -->
                         <div class="col-md-6">
                             <label for="apellidos" class="form-label fw-semibold">Apellidos:</label>
-                            <input type="text" id="apellidos" v-model="nuevoEmpleado.apellidos"
-                                class="form-control" placeholder="Introduce los apellidos" />
+                            <input type="text" id="apellidos" v-model="nuevoEmpleado.apellidos" class="form-control"
+                                placeholder="Introduce los apellidos" />
                         </div>
 
                         <!-- Email -->
                         <div class="col-md-6">
-                            <label for="email" class="form-label fw-semibold">Email: <span class="text-danger">*</span></label>
-                            <input type="email" id="email" v-model="nuevoEmpleado.email"
-                                class="form-control" :class="{ 'is-invalid': errores.email }"
-                                placeholder="ejemplo@correo.com" />
+                            <label for="email" class="form-label fw-semibold">Email: <span
+                                    class="text-danger">*</span></label>
+                            <input type="email" id="email" v-model="nuevoEmpleado.email" class="form-control"
+                                :class="{ 'is-invalid': errores.email }" placeholder="ejemplo@correo.com" />
                             <div v-if="errores.email" class="invalid-feedback">{{ errores.email }}</div>
                         </div>
 
                         <!-- Móvil -->
                         <div class="col-md-3">
                             <label for="movil" class="form-label fw-semibold">Móvil:</label>
-                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil"
-                                class="form-control" placeholder="612345678" />
+                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" class="form-control"
+                                placeholder="612345678" />
                         </div>
 
                         <!-- Puesto (combobox) -->
@@ -64,8 +64,7 @@
                             <i class="bi me-1" :class="editando ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
                             {{ editando ? "Modificar" : "Añadir" }}
                         </button>
-                        <button v-if="editando" type="button" class="btn btn-secondary px-4"
-                            @click="cancelarEdicion">
+                        <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
                             <i class="bi bi-x-circle me-1"></i>Cancelar
                         </button>
                     </div>
@@ -115,12 +114,12 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <button @click="selEmpleado(empleado.id)"
-                                        class="btn btn-warning btn-sm me-1" title="Cargar en formulario" aria-label="Editar empleado">
+                                    <button @click="selEmpleado(empleado.id)" class="btn btn-warning btn-sm me-1"
+                                        title="Cargar en formulario" aria-label="Editar empleado">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button @click="delEmpleado(empleado.id)"
-                                        class="btn btn-danger btn-sm" title="Eliminar empleado">
+                                    <button @click="delEmpleado(empleado.id)" class="btn btn-danger btn-sm"
+                                        title="Eliminar empleado">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
