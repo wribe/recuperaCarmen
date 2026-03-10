@@ -41,8 +41,8 @@
                         <!-- Móvil -->
                         <div class="col-md-3">
                             <label for="movil" class="form-label fw-semibold">Móvil:</label>
-                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" class="form-control align-middle text-center"
-                                placeholder="612345678" />
+                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" @blur="validarMovil"
+                                class="form-control align-middle text-center" :class="{ 'is-invalid': !movilValido }" placeholder="612345678" />
                         </div>
 
                         <!-- Puesto (combobox) -->
@@ -127,6 +127,7 @@
 
 <script setup>
 import { ref, reactive } from "vue";
+import Swal from "sweetalert2";
 
 // ========================= DATOS (ARRAY LOCAL) =========================
 
@@ -190,20 +191,47 @@ const validarFormulario = () => {
     return valido;
 };
 
+// Capitalizar cada palabra de un texto
+const capitalizarPalabras = (str) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
 // addEmpleado: añade un nuevo empleado al array
-const addEmpleado = () => {
+const addEmpleado = async () => {
     if (!validarFormulario()) return;
+
+    // Confirmación antes de añadir
+    const result = await Swal.fire({
+        title: '¿Desea añadir este empleado?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, añadir',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
 
     empleados.value.push({
         id: siguienteId++,
-        nombre: nuevoEmpleado.nombre.trim(),
-        apellidos: nuevoEmpleado.apellidos.trim(),
+        nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
+        apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
         email: nuevoEmpleado.email.trim(),
         movil: nuevoEmpleado.movil.trim(),
         puesto: nuevoEmpleado.puesto,
     });
 
     limpiarFormulario();
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Empleado añadido',
+        showConfirmButton: false,
+        timer: 1500
+    });
 };
 
 // selEmpleado: carga los datos del empleado seleccionado en el formulario
@@ -247,13 +275,46 @@ const updateEmpleado = () => {
 };
 
 // delEmpleado: elimina un empleado del array por su id
-const delEmpleado = (id) => {
+const delEmpleado = async (id) => {
+    // Buscar empleado por ID
+    const empleadoAEliminar = empleados.value.find((e) => e.id === id);
+
+    if (!empleadoAEliminar) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Empleado no encontrado',
+            showConfirmButton: false,
+            timer: 1500
+        });
+        return;
+    }
+
+    // Pedir confirmación antes de eliminar
+    const result = await Swal.fire({
+        title: `¿Eliminar al empleado ${empleadoAEliminar.nombre} ${empleadoAEliminar.apellidos}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    // Si no confirma, salir
+    if (!result.isConfirmed) return;
+
+    // Eliminar del array
     empleados.value = empleados.value.filter((e) => e.id !== id);
 
     // Si se elimina el que se estaba editando, cancelar edición
     if (editandoId.value === id) {
         limpiarFormulario();
     }
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Empleado eliminado',
+        showConfirmButton: false,
+        timer: 1500
+    });
 };
 
 // Cancelar edición
@@ -273,6 +334,27 @@ const limpiarFormulario = () => {
     editandoId.value = null;
     errores.nombre = "";
     errores.email = "";
+};
+
+// Validar móvil
+const movilValido = ref(true);
+const movilRegex = /^[67]\d{8}$/;
+
+const validarMovil = () => {
+    const movil = nuevoEmpleado.movil.trim();
+
+    if (movil === "") {
+        movilValido.value = true; // Vacío = válido (opcional)
+        return true;
+    }
+
+    if (movil.charAt(0) === "6" || movil.charAt(0) === "7") {
+        movilValido.value = movilRegex.test(movil);
+        return movilValido.value;
+    } else {
+        movilValido.value = false;
+        return false;
+    }
 };
 
 // ========================= HELPERS DE PRESENTACIÓN =========================
