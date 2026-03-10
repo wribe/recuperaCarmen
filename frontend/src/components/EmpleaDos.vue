@@ -17,9 +17,10 @@
                         <div class="col-md-6">
                             <label for="nombre" class="form-label fw-semibold">Nombre: <span
                                     class="text-danger">*</span></label>
-                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre" class="form-control"
-                                :class="{ 'is-invalid': errores.nombre }" placeholder="Introduce el nombre" />
-                            <div v-if="errores.nombre" class="invalid-feedback">{{ errores.nombre }}</div>
+                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre" @blur="validarNombre"
+                                class="form-control" :class="{ 'is-invalid': !nombreValido }"
+                                placeholder="Introduce el nombre" />
+                            <div v-if="!nombreValido" class="invalid-feedback">El nombre es obligatorio.</div>
                         </div>
 
                         <!-- Apellidos -->
@@ -33,9 +34,10 @@
                         <div class="col-md-6">
                             <label for="email" class="form-label fw-semibold">Email: <span
                                     class="text-danger">*</span></label>
-                            <input type="email" id="email" v-model="nuevoEmpleado.email" class="form-control"
-                                :class="{ 'is-invalid': errores.email }" placeholder="ejemplo@correo.com" />
-                            <div v-if="errores.email" class="invalid-feedback">{{ errores.email }}</div>
+                            <input type="email" id="email" v-model="nuevoEmpleado.email" @blur="validarEmail"
+                                class="form-control" :class="{ 'is-invalid': !emailValido }"
+                                placeholder="ejemplo@correo.com" />
+                            <div v-if="!emailValido" class="invalid-feedback">El email es obligatorio o no es válido.</div>
                         </div>
 
                         <!-- Móvil -->
@@ -153,11 +155,9 @@ const nuevoEmpleado = reactive({
 const editando = ref(false);
 const editandoId = ref(null);
 
-// Errores de validación
-const errores = reactive({
-    nombre: "",
-    email: "",
-});
+// Validación con refs booleanos (mismo patrón que móvil)
+const nombreValido = ref(true);
+const emailValido = ref(true);
 
 // ========================= FUNCIONES CRUD =========================
 
@@ -166,29 +166,28 @@ const getEmpleado = () => {
     return empleados.value;
 };
 
-// Validación básica: nombre y email obligatorios
+// Validar nombre al perder el foco
+const validarNombre = () => {
+    nombreValido.value = !!nuevoEmpleado.nombre.trim();
+};
+
+// Validar email al perder el foco
+const validarEmail = () => {
+    const email = nuevoEmpleado.email.trim();
+    if (!email) {
+        emailValido.value = false;
+        return;
+    }
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    emailValido.value = regexEmail.test(email);
+};
+
+// Validación básica: nombre y email obligatorios (al hacer submit)
 const validarFormulario = () => {
-    let valido = true;
-    errores.nombre = "";
-    errores.email = "";
-
-    if (!nuevoEmpleado.nombre.trim()) {
-        errores.nombre = "El nombre es obligatorio.";
-        valido = false;
-    }
-
-    if (!nuevoEmpleado.email.trim()) {
-        errores.email = "El email es obligatorio.";
-        valido = false;
-    } else {
-        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regexEmail.test(nuevoEmpleado.email.trim())) {
-            errores.email = "El formato del email no es válido.";
-            valido = false;
-        }
-    }
-
-    return valido;
+    validarNombre();
+    validarEmail();
+    validarMovil();
+    return nombreValido.value && emailValido.value && movilValido.value;
 };
 
 // Capitalizar cada palabra de un texto
@@ -248,8 +247,9 @@ const selEmpleado = (id) => {
     editando.value = true;
     editandoId.value = id;
 
-    errores.nombre = "";
-    errores.email = "";
+    nombreValido.value = true;
+    emailValido.value = true;
+    movilValido.value = true;
 
     // Scroll arriba al formulario
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -332,8 +332,9 @@ const limpiarFormulario = () => {
 
     editando.value = false;
     editandoId.value = null;
-    errores.nombre = "";
-    errores.email = "";
+    nombreValido.value = true;
+    emailValido.value = true;
+    movilValido.value = true;
 };
 
 // Validar móvil
