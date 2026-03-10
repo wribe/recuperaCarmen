@@ -5,10 +5,10 @@
         <!-- Formulario -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
+                <h6 class="mb-0">
                     <i class="bi bi-person-plus-fill me-2"></i>
                     {{ editando ? "Editar Empleado" : "Añadir Empleado" }}
-                </h5>
+                </h6>
             </div>
             <div class="card-body">
                 <form @submit.prevent="editando ? updateEmpleado() : addEmpleado()">
@@ -41,7 +41,7 @@
                         <!-- Móvil -->
                         <div class="col-md-3">
                             <label for="movil" class="form-label fw-semibold">Móvil:</label>
-                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" class="form-control"
+                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" class="form-control align-middle text-center"
                                 placeholder="612345678" />
                         </div>
 
@@ -61,11 +61,11 @@
                     <!-- Botones -->
                     <div class="d-flex justify-content-center gap-3 mt-4">
                         <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi me-1" :class="editando ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+                            <i class="bi me-1"></i>
                             {{ editando ? "Modificar" : "Añadir" }}
                         </button>
                         <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
-                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                            Cancelar
                         </button>
                     </div>
                 </form>
@@ -75,20 +75,13 @@
         <!-- Listado de Empleados -->
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
+                <h6 class="mb-0">
                     <i class="bi bi-people-fill me-2"></i>Listado de Empleados
-                </h5>
-                <span class="badge bg-light text-primary fs-6">{{ empleados.length }} empleados</span>
+                </h6>
             </div>
             <div class="card-body p-0">
-                <!-- Mensaje si no hay empleados -->
-                <div v-if="empleados.length === 0" class="text-center text-muted py-5">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                    <p class="mb-0">No hay empleados registrados.</p>
-                </div>
-
                 <!-- Tabla responsive -->
-                <div v-else class="table-responsive">
+                <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle mb-0">
                         <thead class="table-primary">
                             <tr>
