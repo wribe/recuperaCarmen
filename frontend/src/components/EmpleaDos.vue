@@ -17,7 +17,7 @@
                         <div class="col-md-6">
                             <label for="nombre" class="form-label fw-semibold">Nombre: <span
                                     class="text-danger">*</span></label>
-                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre" @blur="validarNombre"
+                            <input type="text" id="nombre" v-model="nuevoEmpleado.nombre"
                                 class="form-control" :class="{ 'is-invalid': !nombreValido }"
                                 placeholder="Introduce el nombre" />
                             <div v-if="!nombreValido" class="invalid-feedback">El nombre es obligatorio.</div>
@@ -34,7 +34,7 @@
                         <div class="col-md-6">
                             <label for="email" class="form-label fw-semibold">Email: <span
                                     class="text-danger">*</span></label>
-                            <input type="email" id="email" v-model="nuevoEmpleado.email" @blur="validarEmail"
+                            <input type="text" id="email" v-model="nuevoEmpleado.email"
                                 class="form-control" :class="{ 'is-invalid': !emailValido }"
                                 placeholder="ejemplo@correo.com" />
                             <div v-if="!emailValido" class="invalid-feedback">El email es obligatorio o no es válido.</div>
@@ -43,7 +43,7 @@
                         <!-- Móvil -->
                         <div class="col-md-3">
                             <label for="movil" class="form-label fw-semibold">Móvil:</label>
-                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil" @blur="validarMovil"
+                            <input type="tel" id="movil" v-model="nuevoEmpleado.movil"
                                 class="form-control align-middle text-center" :class="{ 'is-invalid': !movilValido }" placeholder="612345678" />
                         </div>
 
@@ -88,20 +88,20 @@
                         <thead class="table-primary">
                             <tr>
                                 <th class="text-center" scope="col">ID</th>
-                                <th scope="col">Apellidos</th>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Email</th>
+                                <th class="text-center" scope="col">Apellidos</th>
+                                <th class="text-center" scope="col">Nombre</th>
+                                <th class="text-center" scope="col">Email</th>
                                 <th class="text-center" scope="col">Móvil</th>
                                 <th class="text-center" scope="col">Puesto</th>
                                 <th class="text-center" scope="col" style="width: 140px">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="empleado in getEmpleado()" :key="empleado.id">
+                            <tr v-for="empleado in empleados" :key="empleado.id">
                                 <td class="text-center fw-bold">{{ empleado.id }}</td>
                                 <td>{{ empleado.apellidos }}</td>
                                 <td>{{ empleado.nombre }}</td>
-                                <td>{{ empleado.email }}</td>
+                                <td class="text-center">{{ empleado.email }}</td>
                                 <td class="text-center">{{ empleado.movil || '-' }}</td>
                                 <td class="text-center">
                                     <span class="badge" :class="badgePuesto(empleado.puesto)">
@@ -166,12 +166,12 @@ const getEmpleado = () => {
     return empleados.value;
 };
 
-// Validar nombre al perder el foco
+// Validar nombre
 const validarNombre = () => {
     nombreValido.value = !!nuevoEmpleado.nombre.trim();
 };
 
-// Validar email al perder el foco
+// Validar email
 const validarEmail = () => {
     const email = nuevoEmpleado.email.trim();
     if (!email) {
@@ -182,12 +182,26 @@ const validarEmail = () => {
     emailValido.value = regexEmail.test(email);
 };
 
-// Validación básica: nombre y email obligatorios (al hacer submit)
+// Validación al hacer submit: nombre, email y móvil
 const validarFormulario = () => {
     validarNombre();
     validarEmail();
     validarMovil();
-    return nombreValido.value && emailValido.value && movilValido.value;
+
+    if (!nombreValido.value) {
+        alerta('error', 'Error', 'El nombre es obligatorio');
+        return false;
+    }
+    if (!emailValido.value) {
+        alerta('error', 'Error', 'El email es obligatorio o no tiene un formato válido');
+        return false;
+    }
+    if (!movilValido.value) {
+        
+        return false;
+    }
+
+    return true;
 };
 
 // Capitalizar cada palabra de un texto
@@ -349,11 +363,13 @@ const validarMovil = () => {
         return true;
     }
 
-    if (movil.charAt(0) === "6" || movil.charAt(0) === "7") {
-        movilValido.value = movilRegex.test(movil);
-        return movilValido.value;
+    if (movilRegex.test(movil)) {
+        movilValido.value = true;
+        alerta('success', 'Móvil válido', '');
+        return true;
     } else {
         movilValido.value = false;
+        alerta('error', 'Error', 'El movil no esta en el formato válido');
         return false;
     }
 };
@@ -381,6 +397,16 @@ const badgePuesto = (puesto) => {
     };
     return colores[puesto] || "bg-secondary";
 };
+
+function alerta(tipo, titulo, texto) {
+    Swal.fire({
+        icon: tipo,
+        title: titulo,
+        text: texto,
+        showConfirmButton: tipo !== 'success',
+        timer: tipo === 'success' ? 1500 : undefined
+    });
+}
 </script>
 
 <style scoped>
