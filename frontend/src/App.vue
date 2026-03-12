@@ -1,12 +1,14 @@
 <template>
-  <div class="d-flex flex-column min-vh-100 justify-content-center">
-    <div class="w-75 w-lg-80 mx-auto  d-flex flex-column min-vh-100">
+  <div class="d-flex flex-column min-vh-100 mx-auto" style="width: 85%;">
+
       <NavBar />
-      <main class="flex-grow-1 w-75 mx-auto w-lg-80">
-        <router-view />
+      <main class="flex-grow-1 mt-2">
+        <div class="container-lg">
+          <router-view />
+        </div>
       </main>
       <FooTer />
-    </div>
+
   </div>
 </template>
 

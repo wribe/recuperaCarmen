@@ -1,5 +1,5 @@
 <template>
-    <div class="container mt-4 mb-5">
+    <div class="container-fluid mt-4 mb-5">
         <h1 class="text-center mb-4 text-primary fw-bold">Gestión de Empleados</h1>
 
         <!-- Formulario -->
@@ -133,14 +133,10 @@ import Swal from "sweetalert2";
 
 // ========================= DATOS (ARRAY LOCAL) =========================
 
-const empleados = ref([
-    { id: 1, apellidos: "García López", nombre: "Ana", email: "ana@empresa.com", movil: "612345678", puesto: "rrhh" },
-    { id: 2, apellidos: "Martínez Ruiz", nombre: "Carlos", email: "carlos@empresa.com", movil: "698765432", puesto: "contabilidad" },
-    { id: 3, apellidos: "Fernández Díaz", nombre: "Laura", email: "laura@empresa.com", movil: "654321987", puesto: "ventas" },
-]);
+const empleados = ref([]);
 
 // Contador autoincremental de IDs
-let siguienteId = 4;
+
 
 // Modelo del formulario con v-model
 const nuevoEmpleado = reactive({
@@ -217,19 +213,9 @@ const capitalizarPalabras = (str) => {
 const addEmpleado = async () => {
     if (!validarFormulario()) return;
 
-    // Confirmación antes de añadir
-    const result = await Swal.fire({
-        title: '¿Desea añadir este empleado?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, añadir',
-        cancelButtonText: 'Cancelar'
-    });
 
-    if (!result.isConfirmed) return;
 
     empleados.value.push({
-        id: siguienteId++,
         nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
         apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
         email: nuevoEmpleado.email.trim(),
@@ -238,14 +224,10 @@ const addEmpleado = async () => {
     });
 
     limpiarFormulario();
+    alerta('success', 'Empleado guardado', '');
+    }
 
-    Swal.fire({
-        icon: 'success',
-        title: 'Empleado añadido',
-        showConfirmButton: false,
-        timer: 1500
-    });
-};
+
 
 // selEmpleado: carga los datos del empleado seleccionado en el formulario
 const selEmpleado = (id) => {
@@ -365,7 +347,6 @@ const validarMovil = () => {
 
     if (movilRegex.test(movil)) {
         movilValido.value = true;
-        alerta('success', 'Móvil válido', '');
         return true;
     } else {
         movilValido.value = false;
