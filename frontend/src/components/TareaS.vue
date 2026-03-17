@@ -170,37 +170,11 @@
 import { ref, reactive } from "vue";
 import Swal from "sweetalert2";
 
-// ========================= EMPLEADOS (desde localStorage) =========================
+// ========================= DATOS TAREAS (ARRAY LOCAL) =========================
 
-const cargarEmpleados = () => {
-    const guardados = localStorage.getItem("empleados");
-    return guardados ? JSON.parse(guardados) : [];
-};
+const tareas = ref([]);
 
-const empleados = ref(cargarEmpleados());
-
-// ========================= DATOS TAREAS (ARRAY LOCAL + LOCALSTORAGE) =========================
-
-const tareasIniciales = [
-    { id: 1, fecha: "2026-03-17", titulo: "Revisar nóminas", descripcion: "Revisar las nóminas del mes de marzo", estado: "pendiente", prioridad: "alta", empleadoId: 1 },
-    { id: 2, fecha: "2026-03-18", titulo: "Inventario almacén", descripcion: "Contar stock de productos", estado: "en_proceso", prioridad: "media", empleadoId: 3 },
-    { id: 3, fecha: "2026-03-20", titulo: "Formación equipo", descripcion: "Sesión de formación sobre el nuevo software", estado: "finalizada", prioridad: "baja", empleadoId: 2 },
-];
-
-const cargarTareas = () => {
-    const guardadas = localStorage.getItem("tareas");
-    return guardadas ? JSON.parse(guardadas) : [...tareasIniciales];
-};
-
-const guardarTareas = () => {
-    localStorage.setItem("tareas", JSON.stringify(tareas.value));
-};
-
-const tareas = ref(cargarTareas());
-
-let siguienteId = tareas.value.length > 0
-    ? Math.max(...tareas.value.map((t) => t.id)) + 1
-    : 1;
+let siguienteId = 1;
 
 // Modelo del formulario
 const nuevaTarea = reactive({
@@ -251,33 +225,30 @@ const nombreEmpleadoEncontrado = ref("");
 const claseCampoEmpleado = ref("");
 
 const buscarEmpleado = () => {
-    // Recargar empleados por si se añadieron nuevos desde EmpleaDos
-    empleados.value = cargarEmpleados();
-
-    const id = nuevaTarea.empleadoId;
-    if (!id) {
-        empleadoEncontrado.value = false;
-        empleadoBuscado.value = false;
-        claseCampoEmpleado.value = "";
-        nombreEmpleadoEncontrado.value = "";
-        return;
-    }
-
-    const emp = empleados.value.find((e) => e.id === id);
-    if (emp) {
-        empleadoEncontrado.value = true;
-        empleadoBuscado.value = true;
-        nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
-        claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
-        alerta("success", "Empleado encontrado", nombreEmpleadoEncontrado.value);
-    } else {
-        empleadoEncontrado.value = false;
-        empleadoBuscado.value = true;
-        nombreEmpleadoEncontrado.value = "";
-        claseCampoEmpleado.value = "border-danger bg-danger bg-opacity-10";
-        alerta("error", "No encontrado", `No existe ningún empleado con ID ${id}`);
-        nuevaTarea.empleadoId = null;
-    }
+    // TODO: Implementar búsqueda real de empleado cuando se conecte con el backend
+    // const id = nuevaTarea.empleadoId;
+    // if (!id) {
+    //     empleadoEncontrado.value = false;
+    //     empleadoBuscado.value = false;
+    //     claseCampoEmpleado.value = "";
+    //     nombreEmpleadoEncontrado.value = "";
+    //     return;
+    // }
+    // const emp = empleados.value.find((e) => e.id === id);
+    // if (emp) {
+    //     empleadoEncontrado.value = true;
+    //     empleadoBuscado.value = true;
+    //     nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
+    //     claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
+    //     alerta("success", "Empleado encontrado", nombreEmpleadoEncontrado.value);
+    // } else {
+    //     empleadoEncontrado.value = false;
+    //     empleadoBuscado.value = true;
+    //     nombreEmpleadoEncontrado.value = "";
+    //     claseCampoEmpleado.value = "border-danger bg-danger bg-opacity-10";
+    //     alerta("error", "No encontrado", `No existe ningún empleado con ID ${id}`);
+    //     nuevaTarea.empleadoId = null;
+    // }
 };
 
 // ========================= FUNCIONES CRUD =========================
@@ -286,15 +257,6 @@ const buscarEmpleado = () => {
 const addTarea = async () => {
     if (!validarFormulario()) return;
 
-    const result = await Swal.fire({
-        title: "¿Desea añadir esta tarea?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí, añadir",
-        cancelButtonText: "Cancelar",
-    });
-
-    if (!result.isConfirmed) return;
 
     tareas.value.push({
         id: siguienteId++,
@@ -306,15 +268,15 @@ const addTarea = async () => {
         empleadoId: nuevaTarea.empleadoId,
     });
 
-    guardarTareas();
     limpiarFormulario();
-
-    Swal.fire({
+    
+    alerta("success", "Tarea añadida");
+    /*Swal.fire({
         icon: "success",
         title: "Tarea añadida",
         showConfirmButton: false,
         timer: 1500,
-    });
+    });*/
 };
 
 // selTarea
@@ -337,17 +299,16 @@ const selTarea = (id) => {
     fechaValida.value = true;
     estadoValido.value = true;
 
-    // Si tiene empleado asignado, mostrar su nombre
-    if (tarea.empleadoId) {
-        empleados.value = cargarEmpleados();
-        const emp = empleados.value.find((e) => e.id === tarea.empleadoId);
-        if (emp) {
-            empleadoEncontrado.value = true;
-            empleadoBuscado.value = true;
-            nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
-            claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
-        }
-    }
+    // TODO: Implementar búsqueda de empleado cuando se conecte con el backend
+    // if (tarea.empleadoId) {
+    //     const emp = empleados.value.find((e) => e.id === tarea.empleadoId);
+    //     if (emp) {
+    //         empleadoEncontrado.value = true;
+    //         empleadoBuscado.value = true;
+    //         nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
+    //         claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
+    //     }
+    // }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
@@ -369,7 +330,6 @@ const updateTarea = () => {
         empleadoId: nuevaTarea.empleadoId,
     };
 
-    guardarTareas();
     limpiarFormulario();
 
     Swal.fire({
@@ -399,7 +359,6 @@ const delTarea = async (id) => {
     if (!result.isConfirmed) return;
 
     tareas.value = tareas.value.filter((t) => t.id !== id);
-    guardarTareas();
 
     if (editandoId.value === id) {
         limpiarFormulario();
@@ -443,10 +402,12 @@ const limpiarFormulario = () => {
 // ========================= HELPERS DE PRESENTACIÓN =========================
 
 // Obtener nombre del empleado por su ID
+// TODO: Implementar cuando se conecte con el backend
 const obtenerNombreEmpleado = (empleadoId) => {
     if (!empleadoId) return "-";
-    const emp = empleados.value.find((e) => e.id === empleadoId);
-    return emp ? `${emp.nombre} ${emp.apellidos}` : "Desconocido";
+    // const emp = empleados.value.find((e) => e.id === empleadoId);
+    // return emp ? `${emp.nombre} ${emp.apellidos}` : "Desconocido";
+    return `Empleado #${empleadoId}`;
 };
 
 // Estado → texto

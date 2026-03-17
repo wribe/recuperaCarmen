@@ -134,10 +134,6 @@ import Swal from "sweetalert2";
 // ========================= DATOS (ARRAY LOCAL) =========================
 
 const empleados = ref([]);
-
-// Contador autoincremental de IDs
-
-
 // Modelo del formulario con v-model
 const nuevoEmpleado = reactive({
     nombre: "",
@@ -216,6 +212,7 @@ const addEmpleado = async () => {
 
 
     empleados.value.push({
+        id: siguienteId++,
         nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
         apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
         email: nuevoEmpleado.email.trim(),
