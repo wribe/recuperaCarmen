@@ -99,8 +99,8 @@
                         <tbody>
                             <tr v-for="empleado in empleados" :key="empleado.id">
                                 <td class="text-center fw-bold">{{ empleado.id }}</td>
-                                <td>{{ empleado.apellidos }}</td>
-                                <td>{{ empleado.nombre }}</td>
+                                <td class="text-center">{{ empleado.apellidos }}</td>
+                                <td class="text-center">{{ empleado.nombre }}</td>
                                 <td class="text-center">{{ empleado.email }}</td>
                                 <td class="text-center">{{ empleado.movil || '-' }}</td>
                                 <td class="text-center">
@@ -212,7 +212,7 @@ const addEmpleado = async () => {
 
 
     empleados.value.push({
-        id: siguienteId++,
+        //id: siguienteId++,
         nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
         apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
         email: nuevoEmpleado.email.trim(),

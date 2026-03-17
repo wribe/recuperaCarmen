@@ -134,8 +134,8 @@
                             <tr v-for="tarea in tareas" :key="tarea.id">
                                 <td class="text-center fw-bold">{{ tarea.id }}</td>
                                 <td class="text-center">{{ tarea.fecha }}</td>
-                                <td>{{ tarea.titulo }}</td>
-                                <td>{{ tarea.descripcion || '-' }}</td>
+                                <td class="text-center">{{ tarea.titulo }}</td>
+                                <td class="text-center">{{ tarea.descripcion || '-' }}</td>
                                 <td class="text-center">
                                     <span class="badge" :class="badgeEstado(tarea.estado)">
                                         {{ formatEstado(tarea.estado) }}
