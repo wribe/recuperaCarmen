@@ -57,21 +57,21 @@
                                 <input class="form-check-input" type="radio" id="prioridadBaja"
                                     v-model="nuevaTarea.prioridad" value="baja" />
                                 <label class="form-check-label" for="prioridadBaja">
-                                    <span class="badge bg-info text-dark">Baja</span>
+                                    <span class="badge  text-dark">Baja</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" id="prioridadMedia"
                                     v-model="nuevaTarea.prioridad" value="media" />
                                 <label class="form-check-label" for="prioridadMedia">
-                                    <span class="badge bg-warning text-dark">Media</span>
+                                    <span class="badge  text-dark">Media</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" id="prioridadAlta"
                                     v-model="nuevaTarea.prioridad" value="alta" />
                                 <label class="form-check-label" for="prioridadAlta">
-                                    <span class="badge bg-danger">Alta</span>
+                                    <span class="badge  text-dark">Alta</span>
                                 </label>
                             </div>
                         </div>
@@ -108,7 +108,6 @@
             </div>
         </div>
 
-        <!-- ========================= LISTADO DE TAREAS ========================= -->
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
@@ -122,8 +121,8 @@
                             <tr>
                                 <th class="text-center" scope="col">ID</th>
                                 <th class="text-center" scope="col">Fecha</th>
-                                <th scope="col">Título</th>
-                                <th scope="col">Descripción</th>
+                                <th class="text-center" scope="col">Título</th>
+                                <th class="text-center" scope="col">Descripción</th>
                                 <th class="text-center" scope="col">Estado</th>
                                 <th class="text-center" scope="col">Prioridad</th>
                                 <th class="text-center" scope="col">Empleado</th>
@@ -142,11 +141,11 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge" :class="badgePrioridad(tarea.prioridad)">
+                                    <span class="badge text-dark" >
                                         {{ formatPrioridad(tarea.prioridad) }}
                                     </span>
                                 </td>
-                                <td class="text-center">{{ obtenerNombreEmpleado(tarea.empleadoId) }}</td>
+                                <td class="text-center"><!--{{ obtenerNombreEmpleado(tarea.empleadoId) }}--></td>
                                 <td class="text-center">
                                     <button @click="selTarea(tarea.id)" class="btn btn-warning btn-sm me-1"
                                         title="Cargar en formulario">
@@ -170,13 +169,11 @@
 import { ref, reactive } from "vue";
 import Swal from "sweetalert2";
 
-// ========================= DATOS TAREAS (ARRAY LOCAL) =========================
 
 const tareas = ref([]);
 
-let siguienteId = 1;
 
-// Modelo del formulario
+
 const nuevaTarea = reactive({
     titulo: "",
     fecha: "",
@@ -186,11 +183,9 @@ const nuevaTarea = reactive({
     empleadoId: null,
 });
 
-// Estado de edición
 const editando = ref(false);
 const editandoId = ref(null);
 
-// ========================= VALIDACIONES =========================
 
 const tituloValido = ref(true);
 const fechaValida = ref(true);
@@ -216,7 +211,6 @@ const validarFormulario = () => {
     return true;
 };
 
-// ========================= BÚSQUEDA DE EMPLEADO =========================
 
 const empleadoEncontrado = ref(false);
 const empleadoBuscado = ref(false); // true cuando ya se hizo una búsqueda
@@ -224,43 +218,16 @@ const nombreEmpleadoEncontrado = ref("");
 
 const claseCampoEmpleado = ref("");
 
-const buscarEmpleado = () => {
-    // TODO: Implementar búsqueda real de empleado cuando se conecte con el backend
-    // const id = nuevaTarea.empleadoId;
-    // if (!id) {
-    //     empleadoEncontrado.value = false;
-    //     empleadoBuscado.value = false;
-    //     claseCampoEmpleado.value = "";
-    //     nombreEmpleadoEncontrado.value = "";
-    //     return;
-    // }
-    // const emp = empleados.value.find((e) => e.id === id);
-    // if (emp) {
-    //     empleadoEncontrado.value = true;
-    //     empleadoBuscado.value = true;
-    //     nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
-    //     claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
-    //     alerta("success", "Empleado encontrado", nombreEmpleadoEncontrado.value);
-    // } else {
-    //     empleadoEncontrado.value = false;
-    //     empleadoBuscado.value = true;
-    //     nombreEmpleadoEncontrado.value = "";
-    //     claseCampoEmpleado.value = "border-danger bg-danger bg-opacity-10";
-    //     alerta("error", "No encontrado", `No existe ningún empleado con ID ${id}`);
-    //     nuevaTarea.empleadoId = null;
-    // }
-};
+const buscarEmpleado = () => {};
 
-// ========================= FUNCIONES CRUD =========================
 
-// addTarea
+
 const addTarea = async () => {
     if (!validarFormulario()) return;
 
 
     tareas.value.push({
-        id: siguienteId++,
-        titulo: nuevaTarea.titulo.trim(),
+        titulo: capitalizarPalabras(nuevaTarea.titulo.trim()),
         fecha: nuevaTarea.fecha,
         descripcion: nuevaTarea.descripcion.trim(),
         estado: nuevaTarea.estado,
@@ -271,15 +238,9 @@ const addTarea = async () => {
     limpiarFormulario();
     
     alerta("success", "Tarea añadida");
-    /*Swal.fire({
-        icon: "success",
-        title: "Tarea añadida",
-        showConfirmButton: false,
-        timer: 1500,
-    });*/
 };
 
-// selTarea
+
 const selTarea = (id) => {
     const tarea = tareas.value.find((t) => t.id === id);
     if (!tarea) return;
@@ -294,26 +255,14 @@ const selTarea = (id) => {
     editando.value = true;
     editandoId.value = id;
 
-    // Resetear validaciones
+    
     tituloValido.value = true;
     fechaValida.value = true;
     estadoValido.value = true;
 
-    // TODO: Implementar búsqueda de empleado cuando se conecte con el backend
-    // if (tarea.empleadoId) {
-    //     const emp = empleados.value.find((e) => e.id === tarea.empleadoId);
-    //     if (emp) {
-    //         empleadoEncontrado.value = true;
-    //         empleadoBuscado.value = true;
-    //         nombreEmpleadoEncontrado.value = `${emp.nombre} ${emp.apellidos}`;
-    //         claseCampoEmpleado.value = "border-warning bg-warning bg-opacity-25";
-    //     }
-    // }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// updateTarea
+
 const updateTarea = () => {
     if (!validarFormulario()) return;
 
@@ -399,22 +348,22 @@ const limpiarFormulario = () => {
     claseCampoEmpleado.value = "";
 };
 
-// ========================= HELPERS DE PRESENTACIÓN =========================
 
-// Obtener nombre del empleado por su ID
-// TODO: Implementar cuando se conecte con el backend
-const obtenerNombreEmpleado = (empleadoId) => {
-    if (!empleadoId) return "-";
-    // const emp = empleados.value.find((e) => e.id === empleadoId);
-    // return emp ? `${emp.nombre} ${emp.apellidos}` : "Desconocido";
-    return `Empleado #${empleadoId}`;
+const capitalizarPalabras = (str) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 };
+
 
 // Estado → texto
 const formatEstado = (estado) => {
     const nombres = { pendiente: "Pendiente", en_proceso: "En proceso", finalizada: "Finalizada" };
     return nombres[estado] || "-";
 };
+
 
 // Estado → color badge (rojo pendiente, amarillo en_proceso, verde finalizada)
 const badgeEstado = (estado) => {
@@ -428,13 +377,7 @@ const formatPrioridad = (prioridad) => {
     return nombres[prioridad] || "-";
 };
 
-// Prioridad → color badge
-const badgePrioridad = (prioridad) => {
-    const colores = { baja: "bg-info text-dark", media: "bg-warning text-dark", alta: "bg-danger" };
-    return colores[prioridad] || "bg-secondary";
-};
 
-// Alerta genérica con Swal
 function alerta(tipo, titulo, texto) {
     Swal.fire({
         icon: tipo,
