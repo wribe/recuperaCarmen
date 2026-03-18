@@ -213,7 +213,7 @@ const validarFormulario = () => {
 
 
 const empleadoEncontrado = ref(false);
-const empleadoBuscado = ref(false); // true cuando ya se hizo una búsqueda
+const empleadoBuscado = ref(false); 
 const nombreEmpleadoEncontrado = ref("");
 
 const claseCampoEmpleado = ref("");
@@ -289,7 +289,7 @@ const updateTarea = () => {
     });
 };
 
-// delTarea
+
 const delTarea = async (id) => {
     const tarea = tareas.value.find((t) => t.id === id);
     if (!tarea) {
@@ -321,12 +321,12 @@ const delTarea = async (id) => {
     });
 };
 
-// Cancelar edición
+
 const cancelarEdicion = () => {
     limpiarFormulario();
 };
 
-// Limpiar formulario
+
 const limpiarFormulario = () => {
     nuevaTarea.titulo = "";
     nuevaTarea.fecha = "";
@@ -357,15 +357,12 @@ const capitalizarPalabras = (str) => {
         .join(' ');
 };
 
-
-// Estado → texto
 const formatEstado = (estado) => {
     const nombres = { pendiente: "Pendiente", en_proceso: "En proceso", finalizada: "Finalizada" };
     return nombres[estado] || "-";
 };
 
 
-// Estado → color badge (rojo pendiente, amarillo en_proceso, verde finalizada)
 const badgeEstado = (estado) => {
     const colores = { pendiente: "bg-danger", en_proceso: "bg-warning text-dark", finalizada: "bg-success" };
     return colores[estado] || "bg-secondary";
