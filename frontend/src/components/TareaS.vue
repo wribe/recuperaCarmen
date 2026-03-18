@@ -76,20 +76,17 @@
                             </div>
                         </div>
 
-                        <!-- Empleado asignado (búsqueda por ID) -->
+                        <!-- Empleado asignado (búsqueda por ID) — solo estético de momento -->
                         <div class="col-md-3">
                             <label for="empleadoId" class="form-label fw-semibold">Empleado (ID):</label>
                             <div class="input-group">
-                                <input type="number" id="empleadoId" v-model.number="nuevaTarea.empleadoId"
-                                    class="form-control" :class="claseCampoEmpleado"
+                                <input type="number" id="empleadoId"
+                                    class="form-control"
                                     placeholder="ID" min="1" />
-                                <button type="button" class="btn btn-outline-secondary" @click="buscarEmpleado" title="Buscar empleado">
-                                    🔎
+                                <button type="button" class="btn btn-outline-secondary" title="Buscar empleado">
+                                    <i class="bi bi-search-heart"></i>
                                 </button>
                             </div>
-                            <small v-if="empleadoEncontrado" class="text-primary fw-semibold">
-                                <i class="bi bi-check-circle me-1"></i>{{ nombreEmpleadoEncontrado }}
-                            </small>
                         </div>
 
                     </div>
@@ -145,7 +142,7 @@
                                         {{ formatPrioridad(tarea.prioridad) }}
                                     </span>
                                 </td>
-                                <td class="text-center"><!--{{ obtenerNombreEmpleado(tarea.empleadoId) }}--></td>
+                                <td class="text-center">-</td>
                                 <td class="text-center">
                                     <button @click="selTarea(tarea.id)" class="btn btn-warning btn-sm me-1"
                                         title="Cargar en formulario">
@@ -180,7 +177,6 @@ const nuevaTarea = reactive({
     descripcion: "",
     estado: "",
     prioridad: "baja",
-    empleadoId: null,
 });
 
 const editando = ref(false);
@@ -212,15 +208,6 @@ const validarFormulario = () => {
 };
 
 
-const empleadoEncontrado = ref(false);
-const empleadoBuscado = ref(false); 
-const nombreEmpleadoEncontrado = ref("");
-
-const claseCampoEmpleado = ref("");
-
-const buscarEmpleado = () => {};
-
-
 
 const addTarea = async () => {
     if (!validarFormulario()) return;
@@ -232,7 +219,6 @@ const addTarea = async () => {
         descripcion: nuevaTarea.descripcion.trim(),
         estado: nuevaTarea.estado,
         prioridad: nuevaTarea.prioridad,
-        empleadoId: nuevaTarea.empleadoId,
     });
 
     limpiarFormulario();
@@ -250,7 +236,6 @@ const selTarea = (id) => {
     nuevaTarea.descripcion = tarea.descripcion;
     nuevaTarea.estado = tarea.estado;
     nuevaTarea.prioridad = tarea.prioridad;
-    nuevaTarea.empleadoId = tarea.empleadoId;
 
     editando.value = true;
     editandoId.value = id;
@@ -276,7 +261,6 @@ const updateTarea = () => {
         descripcion: nuevaTarea.descripcion.trim(),
         estado: nuevaTarea.estado,
         prioridad: nuevaTarea.prioridad,
-        empleadoId: nuevaTarea.empleadoId,
     };
 
     limpiarFormulario();
@@ -333,7 +317,6 @@ const limpiarFormulario = () => {
     nuevaTarea.descripcion = "";
     nuevaTarea.estado = "";
     nuevaTarea.prioridad = "baja";
-    nuevaTarea.empleadoId = null;
 
     editando.value = false;
     editandoId.value = null;
@@ -341,11 +324,6 @@ const limpiarFormulario = () => {
     tituloValido.value = true;
     fechaValida.value = true;
     estadoValido.value = true;
-
-    empleadoEncontrado.value = false;
-    empleadoBuscado.value = false;
-    nombreEmpleadoEncontrado.value = "";
-    claseCampoEmpleado.value = "";
 };
 
 
