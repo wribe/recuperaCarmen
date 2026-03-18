@@ -26,7 +26,7 @@
                         <div class="col-md-3">
                             <label for="fecha" class="form-label fw-semibold">Fecha: <span class="text-danger">*</span></label>
                             <input type="date" id="fecha" v-model="nuevaTarea.fecha"
-                                class="form-control" :class="{ 'is-invalid': !fechaValida }" />
+                                class="form-control text-center" :class="{ 'is-invalid': !fechaValida }" />
                             <div v-if="!fechaValida" class="invalid-feedback">La fecha es obligatoria.</div>
                         </div>
 
@@ -53,21 +53,21 @@
                         <!-- Prioridad (radiobutton) -->
                         <div class="col-md-3">
                             <label class="form-label fw-semibold d-block">Prioridad:</label>
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" id="prioridadBaja"
                                     v-model="nuevaTarea.prioridad" value="baja" />
                                 <label class="form-check-label" for="prioridadBaja">
                                     <span class="badge  text-dark">Baja</span>
                                 </label>
                             </div>
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" id="prioridadMedia"
                                     v-model="nuevaTarea.prioridad" value="media" />
                                 <label class="form-check-label" for="prioridadMedia">
                                     <span class="badge  text-dark">Media</span>
                                 </label>
                             </div>
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" id="prioridadAlta"
                                     v-model="nuevaTarea.prioridad" value="alta" />
                                 <label class="form-check-label" for="prioridadAlta">
@@ -77,9 +77,9 @@
                         </div>
 
                         <!-- Empleado asignado (búsqueda por ID) — solo estético de momento -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="empleadoId" class="form-label fw-semibold">Empleado (ID):</label>
-                            <div class="input-group">
+                            <div class="input-group input-group-sm">
                                 <input type="number" id="empleadoId"
                                     class="form-control"
                                     placeholder="ID" min="1" />
@@ -119,7 +119,6 @@
                                 <th class="text-center" scope="col">ID</th>
                                 <th class="text-center" scope="col">Fecha</th>
                                 <th class="text-center" scope="col">Título</th>
-                                <th class="text-center" scope="col">Descripción</th>
                                 <th class="text-center" scope="col">Estado</th>
                                 <th class="text-center" scope="col">Prioridad</th>
                                 <th class="text-center" scope="col">Empleado</th>
@@ -129,9 +128,8 @@
                         <tbody>
                             <tr v-for="tarea in tareas" :key="tarea.id">
                                 <td class="text-center fw-bold">{{ tarea.id }}</td>
-                                <td class="text-center">{{ tarea.fecha }}</td>
+                                <td class="text-center">{{ formatFecha(tarea.fecha) }}</td>
                                 <td class="text-center">{{ tarea.titulo }}</td>
-                                <td class="text-center">{{ tarea.descripcion || '-' }}</td>
                                 <td class="text-center">
                                     <span class="badge" :class="badgeEstado(tarea.estado)">
                                         {{ formatEstado(tarea.estado) }}
@@ -333,6 +331,13 @@ const capitalizarPalabras = (str) => {
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
+};
+
+
+const formatFecha = (fecha) => {
+    if (!fecha) return "-";
+    const [ano, mes, dia] = fecha.split("-");
+    return `${dia}-${mes}-${ano}`;
 };
 
 const formatEstado = (estado) => {
