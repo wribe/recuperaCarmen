@@ -95,7 +95,7 @@
                     <div class="d-flex justify-content-center gap-3 mt-4">
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="bi me-1"></i>
-                            {{ editando ? "Modificar" : "Añadir" }}
+                            {{ editando ? "Modificar" : "Grabar" }}
                         </button>
                         <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
                             Cancelar
@@ -280,10 +280,10 @@ const delTarea = async (id) => {
     }
 
     const result = await Swal.fire({
-        title: `¿Eliminar la tarea "${tarea.titulo}"?`,
+        title: `¿Eliminar la tarea ?`,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Sí, eliminar",
+        confirmButtonText: "Aceptar",
         cancelButtonText: "Cancelar",
     });
 
