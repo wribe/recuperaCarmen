@@ -10,7 +10,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form @submit.prevent="editando ? updateTarea() : addTarea()">
+                <form @submit.prevent="editando ? updateTarea_local() : addTarea()">
                     <div class="row g-3">
 
                         <!-- Título -->
@@ -22,25 +22,22 @@
                             <div v-if="!tituloValido" class="invalid-feedback">El título es obligatorio.</div>
                         </div>
 
+                        <!-- Empleado asignado (búsqueda por ID) -->
+                        <div class="col-md-3">
+                            <label for="empleadoId" class="form-label fw-semibold">Empleado (ID):</label>
+                            <input type="number" id="empleadoId"
+                                v-model="nuevaTarea.empleadoId"
+                                class="form-control"
+                                placeholder="ID" min="1" />
+                        </div>
+
+
                         <!-- Fecha -->
                         <div class="col-md-3">
                             <label for="fecha" class="form-label fw-semibold">Fecha: <span class="text-danger">*</span></label>
                             <input type="date" id="fecha" v-model="nuevaTarea.fecha"
                                 class="form-control text-center" :class="{ 'is-invalid': !fechaValida }" />
                             <div v-if="!fechaValida" class="invalid-feedback">La fecha es obligatoria.</div>
-                        </div>
-
-                        <!-- Estado (select) -->
-                        <div class="col-md-3">
-                            <label for="estado" class="form-label fw-semibold">Estado: <span class="text-danger">*</span></label>
-                            <select id="estado" v-model="nuevaTarea.estado"
-                                class="form-select" :class="{ 'is-invalid': !estadoValido }">
-                                <option disabled value="">Seleccione estado</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="en_proceso">En proceso</option>
-                                <option value="finalizada">Finalizada</option>
-                            </select>
-                            <div v-if="!estadoValido" class="invalid-feedback">El estado es obligatorio.</div>
                         </div>
 
                         <!-- Descripción (textarea) -->
@@ -76,17 +73,17 @@
                             </div>
                         </div>
 
-                        <!-- Empleado asignado (búsqueda por ID) — solo estético de momento -->
-                        <div class="col-md-2">
-                            <label for="empleadoId" class="form-label fw-semibold">Empleado (ID):</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" id="empleadoId"
-                                    class="form-control"
-                                    placeholder="ID" min="1" />
-                                <button type="button" class="btn btn-outline-secondary" title="Buscar empleado">
-                                    <i class="bi bi-search-heart"></i>
-                                </button>
-                            </div>
+                        <!-- Estado (select) -->
+                        <div class="col-md-3">
+                            <label for="estado" class="form-label fw-semibold">Estado: <span class="text-danger">*</span></label>
+                            <select id="estado" v-model="nuevaTarea.estado"
+                                class="form-select" :class="{ 'is-invalid': !estadoValido }">
+                                <option disabled value="">Seleccione estado</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_proceso">En proceso</option>
+                                <option value="finalizada">Finalizada</option>
+                            </select>
+                            <div v-if="!estadoValido" class="invalid-feedback">El estado es obligatorio.</div>
                         </div>
 
                     </div>
@@ -140,7 +137,9 @@
                                         {{ formatPrioridad(tarea.prioridad) }}
                                     </span>
                                 </td>
-                                <td class="text-center">-</td>
+                                <td class="text-center">
+                                    {{ obtenerNombreEmpleado(tarea.empleadoId) || '-' }}
+                                </td>
                                 <td class="text-center">
                                     <button @click="selTarea(tarea.id)" class="btn btn-warning btn-sm me-1"
                                         title="Cargar en formulario">
@@ -161,13 +160,13 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import Swal from "sweetalert2";
-
+import { getTareas, createTarea, updateTarea, deleteTarea, getEmpleados } from "../services/api.js";
 
 const tareas = ref([]);
-
-
+const empleados = ref([]);
+const cargando = ref(false);
 
 const nuevaTarea = reactive({
     titulo: "",
@@ -175,11 +174,11 @@ const nuevaTarea = reactive({
     descripcion: "",
     estado: "",
     prioridad: "baja",
+    empleadoId: null,
 });
 
 const editando = ref(false);
 const editandoId = ref(null);
-
 
 const tituloValido = ref(true);
 const fechaValida = ref(true);
@@ -202,7 +201,57 @@ const validarFormulario = () => {
         alerta("error", "Error", "El estado es obligatorio");
         return false;
     }
+    
+    // Validar que no haya duplicado de nombre de empleado en otra tarea
+    if (nuevaTarea.empleadoId) {
+        const nombreEmpleado = obtenerNombreEmpleado(nuevaTarea.empleadoId);
+        const duplicado = tareas.value.some(t => 
+            t.id !== editandoId.value && 
+            t.empleadoId === nuevaTarea.empleadoId &&
+            obtenerNombreEmpleado(t.empleadoId) === nombreEmpleado
+        );
+        
+        if (duplicado) {
+            alerta("error", "Error", "Este empleado ya tiene una tarea asignada");
+            return false;
+        }
+    }
+    
     return true;
+};
+
+// ========================= CICLO DE VIDA =========================
+
+/**
+ * Cargar tareas y empleados al montar el componente
+ */
+onMounted(async () => {
+    await cargarDatos();
+});
+
+/**
+ * Cargar tareas y empleados desde la API
+ */
+const cargarDatos = async () => {
+    try {
+        cargando.value = true;
+        tareas.value = await getTareas();
+        empleados.value = await getEmpleados();
+    } catch (error) {
+        alerta("error", "Error", "No se pudieron cargar los datos");
+        console.error(error);
+    } finally {
+        cargando.value = false;
+    }
+};
+
+/**
+ * Obtener nombre del empleado por ID
+ */
+const obtenerNombreEmpleado = (empleadoId) => {
+    if (!empleadoId) return null;
+    const empleado = empleados.value.find(e => e.id === empleadoId);
+    return empleado ? `${empleado.nombre} ${empleado.apellidos}` : null;
 };
 
 
@@ -210,18 +259,29 @@ const validarFormulario = () => {
 const addTarea = async () => {
     if (!validarFormulario()) return;
 
+    try {
+        cargando.value = true;
+        const nuevaTareaData = {
+            titulo: capitalizarPalabras(nuevaTarea.titulo.trim()),
+            fecha: nuevaTarea.fecha,
+            descripcion: nuevaTarea.descripcion.trim(),
+            estado: nuevaTarea.estado,
+            prioridad: nuevaTarea.prioridad,
+            empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
+        };
 
-    tareas.value.push({
-        titulo: capitalizarPalabras(nuevaTarea.titulo.trim()),
-        fecha: nuevaTarea.fecha,
-        descripcion: nuevaTarea.descripcion.trim(),
-        estado: nuevaTarea.estado,
-        prioridad: nuevaTarea.prioridad,
-    });
-
-    limpiarFormulario();
-    
-    alerta("success", "Tarea añadida");
+        await createTarea(nuevaTareaData);
+        
+        // Recargar lista
+        await cargarDatos();
+        limpiarFormulario();
+        alerta("success", "Tarea añadida", "");
+    } catch (error) {
+        alerta("error", "Error", "No se pudo guardar la tarea");
+        console.error(error);
+    } finally {
+        cargando.value = false;
+    }
 };
 
 
@@ -234,6 +294,7 @@ const selTarea = (id) => {
     nuevaTarea.descripcion = tarea.descripcion;
     nuevaTarea.estado = tarea.estado;
     nuevaTarea.prioridad = tarea.prioridad;
+    nuevaTarea.empleadoId = tarea.empleadoId;
 
     editando.value = true;
     editandoId.value = id;
@@ -246,29 +307,38 @@ const selTarea = (id) => {
 };
 
 
-const updateTarea = () => {
+const updateTarea_local = async () => {
     if (!validarFormulario()) return;
 
-    const index = tareas.value.findIndex((t) => t.id === editandoId.value);
-    if (index === -1) return;
+    try {
+        cargando.value = true;
+        const tareaActualizada = {
+            titulo: nuevaTarea.titulo.trim(),
+            fecha: nuevaTarea.fecha,
+            descripcion: nuevaTarea.descripcion.trim(),
+            estado: nuevaTarea.estado,
+            prioridad: nuevaTarea.prioridad,
+            empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
+        };
 
-    tareas.value[index] = {
-        id: editandoId.value,
-        titulo: nuevaTarea.titulo.trim(),
-        fecha: nuevaTarea.fecha,
-        descripcion: nuevaTarea.descripcion.trim(),
-        estado: nuevaTarea.estado,
-        prioridad: nuevaTarea.prioridad,
-    };
+        await updateTarea(editandoId.value, tareaActualizada);
+        
+        // Recargar lista
+        await cargarDatos();
+        limpiarFormulario();
 
-    limpiarFormulario();
-
-    Swal.fire({
-        icon: "success",
-        title: "Tarea actualizada",
-        showConfirmButton: false,
-        timer: 1500,
-    });
+        Swal.fire({
+            icon: "success",
+            title: "Tarea actualizada",
+            showConfirmButton: false,
+            timer: 1500,
+        });
+    } catch (error) {
+        alerta("error", "Error", "No se pudo actualizar la tarea");
+        console.error(error);
+    } finally {
+        cargando.value = false;
+    }
 };
 
 
@@ -280,7 +350,7 @@ const delTarea = async (id) => {
     }
 
     const result = await Swal.fire({
-        title: `¿Eliminar la tarea ?`,
+        title: `¿Eliminar la tarea?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Aceptar",
@@ -289,18 +359,29 @@ const delTarea = async (id) => {
 
     if (!result.isConfirmed) return;
 
-    tareas.value = tareas.value.filter((t) => t.id !== id);
+    try {
+        cargando.value = true;
+        await deleteTarea(id);
 
-    if (editandoId.value === id) {
-        limpiarFormulario();
+        // Recargar lista
+        await cargarDatos();
+
+        if (editandoId.value === id) {
+            limpiarFormulario();
+        }
+
+        Swal.fire({
+            icon: "success",
+            title: "Tarea eliminada",
+            showConfirmButton: false,
+            timer: 1500,
+        });
+    } catch (error) {
+        alerta("error", "Error", "No se pudo eliminar la tarea");
+        console.error(error);
+    } finally {
+        cargando.value = false;
     }
-
-    Swal.fire({
-        icon: "success",
-        title: "Tarea eliminada",
-        showConfirmButton: false,
-        timer: 1500,
-    });
 };
 
 
@@ -315,6 +396,7 @@ const limpiarFormulario = () => {
     nuevaTarea.descripcion = "";
     nuevaTarea.estado = "";
     nuevaTarea.prioridad = "baja";
+    nuevaTarea.empleadoId = null;
 
     editando.value = false;
     editandoId.value = null;

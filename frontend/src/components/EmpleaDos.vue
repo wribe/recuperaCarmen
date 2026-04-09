@@ -11,7 +11,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form @submit.prevent="editando ? updateEmpleado() : addEmpleado()">
+                <form @submit.prevent="editando ? updateEmpleado_local() : addEmpleado()">
                     <div class="row g-3">
                         <!-- Nombre -->
                         <div class="col-md-6">
@@ -128,12 +128,15 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import Swal from "sweetalert2";
+import { getEmpleados, createEmpleado, updateEmpleado, deleteEmpleado } from "../services/api.js";
 
-// ========================= DATOS (ARRAY LOCAL) =========================
+// ========================= DATOS (DE API JSON SERVER) =========================
 
 const empleados = ref([]);
+const cargando = ref(false);
+
 // Modelo del formulario con v-model
 const nuevoEmpleado = reactive({
     nombre: "",
@@ -150,6 +153,30 @@ const editandoId = ref(null);
 // Validación con refs booleanos (mismo patrón que móvil)
 const nombreValido = ref(true);
 const emailValido = ref(true);
+
+// ========================= CICLO DE VIDA =========================
+
+/**
+ * Cargar empleados al montar el componente
+ */
+onMounted(async () => {
+    await cargarEmpleados();
+});
+
+/**
+ * Cargar empleados desde la API
+ */
+const cargarEmpleados = async () => {
+    try {
+        cargando.value = true;
+        empleados.value = await getEmpleados();
+    } catch (error) {
+        alerta("error", "Error", "No se pudieron cargar los empleados");
+        console.error(error);
+    } finally {
+        cargando.value = false;
+    }
+};
 
 // ========================= FUNCIONES CRUD =========================
 
@@ -205,24 +232,33 @@ const capitalizarPalabras = (str) => {
         .join(' ');
 };
 
-// addEmpleado: añade un nuevo empleado al array
+// addEmpleado: añade un nuevo empleado a través de la API
 const addEmpleado = async () => {
     if (!validarFormulario()) return;
 
+    try {
+        cargando.value = true;
+        const nuevoEmpleadoData = {
+            nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
+            apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
+            email: nuevoEmpleado.email.trim(),
+            movil: nuevoEmpleado.movil.trim(),
+            puesto: nuevoEmpleado.puesto,
+        };
 
-
-    empleados.value.push({
-        //id: siguienteId++,
-        nombre: capitalizarPalabras(nuevoEmpleado.nombre.trim()),
-        apellidos: capitalizarPalabras(nuevoEmpleado.apellidos.trim()),
-        email: nuevoEmpleado.email.trim(),
-        movil: nuevoEmpleado.movil.trim(),
-        puesto: nuevoEmpleado.puesto,
-    });
-
-    limpiarFormulario();
-    alerta('success', 'Empleado guardado', '');
+        await createEmpleado(nuevoEmpleadoData);
+        
+        // Recargar lista
+        await cargarEmpleados();
+        limpiarFormulario();
+        alerta('success', 'Empleado guardado', '');
+    } catch (error) {
+        alerta('error', 'Error', 'No se pudo guardar el empleado');
+        console.error(error);
+    } finally {
+        cargando.value = false;
     }
+}
 
 
 
@@ -248,26 +284,35 @@ const selEmpleado = (id) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// updateEmpleado: modifica el empleado que se está editando
-const updateEmpleado = () => {
+// updateEmpleado: modifica el empleado a través de la API
+const updateEmpleado_local = async () => {
     if (!validarFormulario()) return;
 
-    const index = empleados.value.findIndex((e) => e.id === editandoId.value);
-    if (index === -1) return;
+    try {
+        cargando.value = true;
+        const empleadoActualizado = {
+            nombre: nuevoEmpleado.nombre.trim(),
+            apellidos: nuevoEmpleado.apellidos.trim(),
+            email: nuevoEmpleado.email.trim(),
+            movil: nuevoEmpleado.movil.trim(),
+            puesto: nuevoEmpleado.puesto,
+        };
 
-    empleados.value[index] = {
-        id: editandoId.value,
-        nombre: nuevoEmpleado.nombre.trim(),
-        apellidos: nuevoEmpleado.apellidos.trim(),
-        email: nuevoEmpleado.email.trim(),
-        movil: nuevoEmpleado.movil.trim(),
-        puesto: nuevoEmpleado.puesto,
-    };
-
-    limpiarFormulario();
+        await updateEmpleado(editandoId.value, empleadoActualizado);
+        
+        // Recargar lista
+        await cargarEmpleados();
+        limpiarFormulario();
+        alerta('success', 'Empleado actualizado', '');
+    } catch (error) {
+        alerta('error', 'Error', 'No se pudo actualizar el empleado');
+        console.error(error);
+    } finally {
+        cargando.value = false;
+    }
 };
 
-// delEmpleado: elimina un empleado del array por su id
+// delEmpleado: elimina un empleado a través de la API
 const delEmpleado = async (id) => {
     // Buscar empleado por ID
     const empleadoAEliminar = empleados.value.find((e) => e.id === id);
@@ -294,20 +339,30 @@ const delEmpleado = async (id) => {
     // Si no confirma, salir
     if (!result.isConfirmed) return;
 
-    // Eliminar del array
-    empleados.value = empleados.value.filter((e) => e.id !== id);
+    try {
+        cargando.value = true;
+        await deleteEmpleado(id);
 
-    // Si se elimina el que se estaba editando, cancelar edición
-    if (editandoId.value === id) {
-        limpiarFormulario();
+        // Recargar lista
+        await cargarEmpleados();
+
+        // Si se elimina el que se estaba editando, cancelar edición
+        if (editandoId.value === id) {
+            limpiarFormulario();
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Empleado eliminado',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } catch (error) {
+        alerta('error', 'Error', 'No se pudo eliminar el empleado');
+        console.error(error);
+    } finally {
+        cargando.value = false;
     }
-
-    Swal.fire({
-        icon: 'success',
-        title: 'Empleado eliminado',
-        showConfirmButton: false,
-        timer: 1500
-    });
 };
 
 // Cancelar edición
