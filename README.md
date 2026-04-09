@@ -22,3 +22,8 @@ npm run dev
 
 # 4. Ver en el navegador
 http://localhost:5173
+
+# 5. Puerto del json-server -> 3000
+Endpoints:
+http://localhost:3000/empleados
+http://localhost:3000/tareas
