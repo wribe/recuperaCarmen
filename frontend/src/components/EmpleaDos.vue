@@ -170,11 +170,13 @@ const cargarEmpleados = async () => {
     try {
         cargando.value = true;
         empleados.value = await getEmpleados();
+        alerta("success", "Empleados cargados", "");
     } catch (error) {
         alerta("error", "Error", "No se pudieron cargar los empleados");
         console.error(error);
     } finally {
         cargando.value = false;
+        
     }
 };
 

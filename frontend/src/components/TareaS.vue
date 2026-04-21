@@ -238,6 +238,7 @@ const cargarDatos = async () => {
         cargando.value = true;
         tareas.value = await getTareas();
         empleados.value = await getEmpleados();
+        alerta("success", "Datos cargados", "Tareas y empleados cargados correctamente");
     } catch (error) {
         alerta("error", "Error", "No se pudieron cargar los datos");
         console.error(error);
