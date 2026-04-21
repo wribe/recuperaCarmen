@@ -11,7 +11,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form @submit.prevent="editando ? updateEmpleado_local() : addEmpleado()">
+                <form @submit.prevent="editando ? actualizarEmpleado() : añadirEmpleado()">
                     <div class="row g-3">
                         <!-- Nombre -->
                         <div class="col-md-6">
@@ -130,7 +130,7 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import Swal from "sweetalert2";
-import { getEmpleados, createEmpleado, updateEmpleado, deleteEmpleado } from "../services/api.js";
+import { getEmpleados, getEmpleadoById, addEmpleado, updateEmpleado, deleteEmpleado } from "../api/empleados.js";
 
 // ========================= DATOS (DE API JSON SERVER) =========================
 
@@ -232,8 +232,8 @@ const capitalizarPalabras = (str) => {
         .join(' ');
 };
 
-// addEmpleado: añade un nuevo empleado a través de la API
-const addEmpleado = async () => {
+// añadirEmpleado: añade un nuevo empleado a través de la API
+const añadirEmpleado = async () => {
     if (!validarFormulario()) return;
 
     try {
@@ -246,7 +246,7 @@ const addEmpleado = async () => {
             puesto: nuevoEmpleado.puesto,
         };
 
-        await createEmpleado(nuevoEmpleadoData);
+        await addEmpleado(nuevoEmpleadoData);
         
         // Recargar lista
         await cargarEmpleados();
@@ -284,8 +284,8 @@ const selEmpleado = (id) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// updateEmpleado: modifica el empleado a través de la API
-const updateEmpleado_local = async () => {
+// actualizarEmpleado: modifica el empleado a través de la API
+const actualizarEmpleado = async () => {
     if (!validarFormulario()) return;
 
     try {

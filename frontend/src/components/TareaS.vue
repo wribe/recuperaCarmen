@@ -10,7 +10,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form @submit.prevent="editando ? updateTarea_local() : addTarea()">
+                <form @submit.prevent="editando ? actualizarTarea() : añadirTarea()">
                     <div class="row g-3">
 
                         <!-- Título -->
@@ -162,7 +162,8 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import Swal from "sweetalert2";
-import { getTareas, createTarea, updateTarea, deleteTarea, getEmpleados } from "../services/api.js";
+import { getTareas, getTareaById, addTarea, updateTarea, deleteTarea } from "../api/tareas.js";
+import { getEmpleados } from "../api/empleados.js";
 
 const tareas = ref([]);
 const empleados = ref([]);
@@ -256,7 +257,7 @@ const obtenerNombreEmpleado = (empleadoId) => {
 
 
 
-const addTarea = async () => {
+const añadirTarea = async () => {
     if (!validarFormulario()) return;
 
     try {
@@ -270,7 +271,7 @@ const addTarea = async () => {
             empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
         };
 
-        await createTarea(nuevaTareaData);
+        await addTarea(nuevaTareaData);
         
         // Recargar lista
         await cargarDatos();
@@ -307,7 +308,7 @@ const selTarea = (id) => {
 };
 
 
-const updateTarea_local = async () => {
+const actualizarTarea = async () => {
     if (!validarFormulario()) return;
 
     try {
