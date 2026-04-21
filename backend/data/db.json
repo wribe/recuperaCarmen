@@ -1,5 +1,23 @@
 {
-    "empleados": [],
-    "tareas": [],
-    "$schema": "./node_modules/json-server/schema.json"
+  "empleados": [
+    {
+      "nombre": "Carmen",
+      "apellidos": "García Alonso",
+      "email": "carmenga24teis@gmail.com",
+      "movil": "666666666",
+      "puesto": "rrhh",
+      "id": 1
+    }
+  ],
+  "tareas": [
+    {
+      "titulo": "Hola Martuki",
+      "fecha": "2026-04-21",
+      "descripcion": "",
+      "estado": "pendiente",
+      "prioridad": "baja",
+      "empleadoId": null,
+      "id": 1
+    }
+  ]
 }
