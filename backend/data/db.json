@@ -6,18 +6,8 @@
       "email": "carmenga24teis@gmail.com",
       "movil": "666666666",
       "puesto": "rrhh",
-      "id": 1
+      "id": 2
     }
   ],
-  "tareas": [
-    {
-      "titulo": "Hola Martuki",
-      "fecha": "2026-04-21",
-      "descripcion": "",
-      "estado": "pendiente",
-      "prioridad": "baja",
-      "empleadoId": null,
-      "id": 1
-    }
-  ]
+  "tareas": []
 }
