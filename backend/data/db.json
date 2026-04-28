@@ -1,13 +1,31 @@
 {
   "empleados": [
     {
-      "nombre": "Carmen",
-      "apellidos": "García Alonso",
-      "email": "carmenga24teis@gmail.com",
-      "movil": "666666666",
-      "puesto": "rrhh",
-      "id": 1
+      "nombre": "Sebastián",
+      "apellidos": "Collarte",
+      "email": "sebas@gmail.com",
+      "movil": "654125478",
+      "puesto": "contabilidad",
+      "id": 2
+    },
+    {
+      "nombre": "María",
+      "apellidos": "Santos",
+      "email": "maria@josn.com",
+      "movil": "654147214",
+      "puesto": "almacen",
+      "id": 3
     }
   ],
-  "tareas": []
+  "tareas": [
+    {
+      "titulo": "Reunión Ventas",
+      "fecha": "2026-04-08",
+      "descripcion": "Análisis ventas del primer trimestre",
+      "estado": "finalizada",
+      "prioridad": "alta",
+      "empleadoId": 2,
+      "id": 1
+    }
+  ]
 }
