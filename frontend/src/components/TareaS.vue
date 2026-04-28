@@ -238,6 +238,7 @@ const cargarDatos = async () => {
         cargando.value = true;
         tareas.value = await getTareas();
         empleados.value = await getEmpleados();
+        console.log("Tareas recibidas del servidor:", tareas.value);
         alerta("success", "Datos cargados", "Tareas y empleados cargados correctamente");
     } catch (error) {
         alerta("error", "Error", "No se pudieron cargar los datos");
@@ -263,24 +264,43 @@ const añadirTarea = async () => {
 
     try {
         cargando.value = true;
+
+        // Construimos el objeto con datos limpios
         const nuevaTareaData = {
             titulo: capitalizarPalabras(nuevaTarea.titulo.trim()),
             fecha: nuevaTarea.fecha,
-            descripcion: nuevaTarea.descripcion.trim(),
+            // Si la descripción está vacía, enviamos un string vacío en lugar de undefined
+            descripcion: nuevaTarea.descripcion ? nuevaTarea.descripcion.trim() : "",
             estado: nuevaTarea.estado,
             prioridad: nuevaTarea.prioridad,
+            // IMPORTANTE: Manejo del empleadoId para evitar errores en json-server
+            // Si hay un ID, lo convertimos a número. Si no, lo dejamos como null explícito.
             empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
         };
 
+        // Enviamos a la API (tareas.js)
+        // Nota: No enviamos "id" porque json-server lo genera solo automáticamente
         await addTarea(nuevaTareaData);
         
-        // Recargar lista
+        // Recargar la lista de tareas y empleados para ver los cambios
         await cargarDatos();
+        
+        // Limpiar los campos del formulario
         limpiarFormulario();
-        alerta("success", "Tarea añadida", "");
+
+        // Alerta de éxito con SweetAlert
+        Swal.fire({
+            icon: "success",
+            title: "Tarea añadida",
+            text: "La tarea se ha guardado correctamente",
+            showConfirmButton: false,
+            timer: 1500,
+        });
+
     } catch (error) {
-        alerta("error", "Error", "No se pudo guardar la tarea");
-        console.error(error);
+        // Si hay un error, lo mostramos detallado en consola para depurar
+        console.error("Error al añadir tarea:", error);
+        alerta("error", "Error", "No se pudo guardar la tarea en el servidor");
     } finally {
         cargando.value = false;
     }
@@ -345,16 +365,18 @@ const actualizarTarea = async () => {
 
 
 const delTarea = async (id) => {
+    // 1. Buscamos la tarea localmente para el mensaje de confirmación
     const tarea = tareas.value.find((t) => t.id === id);
-    if (!tarea) {
-        alerta("error", "Tarea no encontrada", "");
-        return;
-    }
+    if (!tarea) return;
 
+    // 2. Alerta de confirmación
     const result = await Swal.fire({
         title: `¿Eliminar la tarea?`,
+        text: `Vas a eliminar: ${tarea.titulo}`,
         icon: "warning",
         showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
         confirmButtonText: "Aceptar",
         cancelButtonText: "Cancelar",
     });
@@ -363,28 +385,52 @@ const delTarea = async (id) => {
 
     try {
         cargando.value = true;
+        
+        // 3. Intentamos el borrado en el servidor
         await deleteTarea(id);
 
-        // Recargar lista
+        // 4. Si el servidor responde bien (200 OK), refrescamos la lista
         await cargarDatos();
-
-        if (editandoId.value === id) {
-            limpiarFormulario();
-        }
-
+        
         Swal.fire({
             icon: "success",
             title: "Tarea eliminada",
             showConfirmButton: false,
             timer: 1500,
         });
+
     } catch (error) {
-        alerta("error", "Error", "No se pudo eliminar la tarea");
-        console.error(error);
+        // 5. MANEJO DEL ERROR 500:
+        // El servidor dio error, pero vamos a RE-CARGAR los datos de todos modos
+        // para ver si realmente se borró el archivo db.json
+        await cargarDatos(); 
+
+        // Comprobamos si el ID que queríamos borrar sigue en la lista de tareas
+        const todaviaExiste = tareas.value.some(t => t.id === id);
+        
+        if (!todaviaExiste) {
+            // Si YA NO EXISTE, es que se borró con éxito (el 500 fue un falso error)
+            Swal.fire({
+                icon: "success",
+                title: "Tarea eliminada",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+            
+            // Si estábamos editando esa tarea, limpiamos el formulario
+            if (editandoId.value === id) {
+                limpiarFormulario();
+            }
+        } else {
+            // Si todavía existe en la lista, entonces sí hubo un error real de borrado
+            console.error("Error real al eliminar:", error);
+            alerta("error", "Error", "No se pudo eliminar la tarea del servidor.");
+        }
     } finally {
         cargando.value = false;
     }
 };
+
 
 
 const cancelarEdicion = () => {

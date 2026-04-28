@@ -79,12 +79,17 @@ export const deleteTarea = (id) => {
     return fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
     })
-        .then(res => {
-            if (!res.ok) throw new Error(`Error: ${res.status}`);
-            return res.json();
-        })
-        .catch(error => {
-            console.error('Error deleting tarea:', error);
-            throw error;
-        });
+    .then(async res => {
+        // Si la respuesta no es exitosa (ej. el 500 que te sale)
+        if (!res.ok) {
+            const mensajeError = await res.text();
+            // Lanzamos el error para que el catch del componente lo gestione
+            throw new Error(mensajeError || `Error: ${res.status}`);
+        }
+        
+        // Si llegamos aquí con un 200/204, intentamos leer JSON o devolvemos objeto vacío
+        return res.status === 204 ? {} : res.json().catch(() => ({}));
+    });
 };
+
+
