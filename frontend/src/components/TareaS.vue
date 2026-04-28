@@ -101,8 +101,76 @@
                 </form>
             </div>
         </div>
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-list-task me-2"></i>Listado de Tareas</h6>
+        
+        <div class="d-flex align-items-center gap-2">
+            <small>Filtrar por prioridad:</small>
+            <select v-model="filtroPrioridad" class="form-select form-select-sm" style="width: auto;">
+                <option value="todas">Todas</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+            </select>
+        </div>
+    </div>
 
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th>Título</th>
+                        <th class="text-center">Prioridad</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Usuario ID</th> <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="tarea in tareasFiltradas" :key="tarea.id">
+                        <td class="text-center fw-bold">{{ tarea.id }}</td>
+                        <td>{{ tarea.titulo }}</td>
+                        <td class="text-center">
+                            <span class="badge" :class="badgePrioridad(tarea.prioridad)">
+                                {{ tarea.prioridad }}
+                            </span>
+                        </td>
+                        <td class="text-center">{{ tarea.estado }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border">
+                                {{ tarea.empleadoId ? `ID: ${tarea.empleadoId}` : 'Sin asignar' }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+        <small>Prioridad:</small>
+        <select v-model="filtroPrioridad" class="form-select form-select-sm" style="width: auto;">
+            <option value="todas">Todas</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+        </select>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <small>ID Empleado:</small>
+        <input type="number" v-model="filtroEmpleadoId" 
+               class="form-control form-control-sm" 
+               placeholder="Buscar por ID..." style="width: 120px;">
+    </div>
+</div>
         <div class="card shadow-sm">
+            
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
                     <i class="bi bi-list-task me-2"></i>Listado de Tareas
@@ -160,7 +228,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import Swal from "sweetalert2";
 import { getTareas, getTareaById, addTarea, updateTarea, deleteTarea } from "../api/tareas.js";
 import { getEmpleados } from "../api/empleados.js";
@@ -497,6 +565,35 @@ function alerta(tipo, titulo, texto) {
         timer: tipo === "success" ? 1500 : undefined,
     });
 }
+
+
+const filtroPrioridad = ref('todas');
+const filtroEmpleadoId = ref('');
+
+const tareasFiltradas = computed(() => {
+    let resultado = tareas.value;
+
+    if (filtroPrioridad.value !== 'todas') {
+        resultado = resultado.filter(t => t.prioridad === filtroPrioridad.value);
+    }
+
+    if (filtroEmpleadoId.value) {
+        resultado = resultado.filter(t => t.empleadoId == filtroEmpleadoId.value);
+    }
+
+    return resultado;
+});
+
+// Función para asignar colores a las prioridades en la tabla
+const badgePrioridad = (prioridad) => {
+    const colores = {
+        alta: 'bg-danger',          // Rojo
+        media: 'bg-warning text-dark', // Amarillo
+        baja: 'bg-info text-dark'      // Azul clarito
+    };
+    return colores[prioridad] || 'bg-secondary';
+};
+
 </script>
 
 <style scoped>
