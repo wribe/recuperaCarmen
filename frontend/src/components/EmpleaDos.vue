@@ -69,6 +69,10 @@
                         <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
                             Cancelar
                         </button>
+                        <button type="button" class="btn btn-info px-4" @click="exportarPDF">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>
+                            Imprimir
+                        </button>
                     </div>
                 </form>
             </div>
@@ -130,6 +134,8 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import Swal from "sweetalert2";
+import {jsPDF} from "jspdf";
+import autoTable from "jspdf-autotable"; 
 import { getEmpleados, getEmpleadoById, addEmpleado, updateEmpleado, deleteEmpleado } from "../api/empleados.js";
 
 // ========================= DATOS (DE API JSON SERVER) =========================
@@ -442,6 +448,79 @@ function alerta(tipo, titulo, texto) {
         timer: tipo === 'success' ? 1500 : undefined
     });
 }
+
+
+
+const exportarPDF = () => {
+    const doc = new jsPDF();
+
+    // Definir las columnas
+    const columnas = ["ID", "Apellidos", "Nombre", "Email", "Móvil", "Puesto"];
+    
+    // Preparar las filas
+    const filas = empleados.value.map(e => [
+        e.id,
+        e.apellidos,
+        e.nombre,
+        e.email,
+        e.movil || '-',
+        formatPuesto(e.puesto)
+    ]);
+
+    // --- DISEÑO DEL ENCABEZADO ---
+    doc.setFontSize(18);
+    doc.setTextColor(13, 110, 253); // Azul Primary de Bootstrap (#0d6efd)
+    doc.text("GESTIÓN DE EMPLEADOS", 14, 20);
+    
+    // Línea decorativa azul debajo del título
+    doc.setDrawColor(13, 110, 253);
+    doc.setLineWidth(0.5);
+    doc.line(14, 23, 60, 23);
+
+    // --- GENERACIÓN DE LA TABLA ---
+    autoTable(doc, {
+        head: [columnas],
+        body: filas,
+        startY: 30,
+        theme: 'striped', // Filas alternas con color suave
+        headStyles: {
+            fillColor: [13, 110, 253], // Azul Primary de Bootstrap
+            textColor: [255, 255, 255], // Texto blanco
+            fontSize: 10,
+            fontStyle: 'bold',
+            halign: 'center'
+        },
+        bodyStyles: {
+            fontSize: 9,
+            textColor: [51, 51, 51] // Gris oscuro para mejor lectura
+        },
+        alternateRowStyles: {
+            fillColor: [240, 247, 255] // Azul muy clarito para las filas alternas
+        },
+        columnStyles: {
+            0: { halign: 'center', fontStyle: 'bold' }, // ID centrado y negrita
+            4: { halign: 'center' }, // Móvil centrado
+            5: { halign: 'center' }  // Puesto centrado
+        },
+        margin: { top: 30 },
+        // Añadir una línea de borde a la tabla
+        tableLineColor: [200, 200, 200],
+        tableLineWidth: 0.1,
+    });
+
+    // --- PIE DE PÁGINA ---
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Documento generado el: ${new Date().toLocaleDateString()}`, 14, doc.internal.pageSize.height - 10);
+        doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+    }
+
+    doc.save("Listado_Empleados.pdf");
+};
+
 </script>
 
 <style scoped>
