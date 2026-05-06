@@ -69,9 +69,7 @@
                         <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
                             Cancelar
                         </button>
-                        <button type="button" class="btn btn-info px-4" @click="exportarPDF">
-                            <i class="bi bi-printer"></i>
-                        </button>
+                        
                     </div>
                 </form>
             </div>
@@ -83,6 +81,9 @@
                 <h6 class="mb-0">
                     <i class="bi bi-people-fill me-2"></i>Listado de Empleados
                 </h6>
+                <button type="button" class="btn btn-info px-4" @click="exportarPDF">
+                            <i class="bi bi-printer"></i>
+                </button>
             </div>
             <div class="card-body p-0">
                 <!-- Tabla responsive -->
@@ -467,9 +468,24 @@ const exportarPDF = () => {
     ]);
 
     // --- DISEÑO DEL ENCABEZADO ---
+    // Dibujar edificio con formas geométricas
+    doc.setFillColor(13, 110, 253); // Azul del edificio
+    doc.rect(11, 16, 6, 6, 'F'); // Cuerpo del edificio
+    
+    // Ventanas
+    doc.setFillColor(255, 255, 255); // Ventanas blancas
+    doc.rect(12, 17, 1.2, 1.2, 'F');
+    doc.rect(14, 17, 1.2, 1.2, 'F');
+    doc.rect(12, 19, 1.2, 1.2, 'F');
+    doc.rect(14, 19, 1.2, 1.2, 'F');
+    
+    // Puerta
+    doc.setFillColor(200, 200, 200);
+    doc.rect(12.8, 20.5, 1.2, 1.5, 'F');
+    
     doc.setFontSize(18);
     doc.setTextColor(13, 110, 253); // Azul Primary de Bootstrap (#0d6efd)
-    doc.text("GESTIÓN DE EMPLEADOS", 14, 20);
+    doc.text("GESTIÓN DE EMPLEADOS", 19, 20);
     
     // Línea decorativa azul debajo del título
     doc.setDrawColor(13, 110, 253);
