@@ -26,6 +26,15 @@
       "prioridad": "alta",
       "empleadoId": 2,
       "id": 1
+    },
+    {
+      "titulo": "Hola Martuki",
+      "fecha": "2026-05-06",
+      "descripcion": "",
+      "estado": "en_proceso",
+      "prioridad": "baja",
+      "empleadoId": 1,
+      "id": 2
     }
   ]
 }

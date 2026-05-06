@@ -97,6 +97,9 @@
                         <button v-if="editando" type="button" class="btn btn-secondary px-4" @click="cancelarEdicion">
                             Cancelar
                         </button>
+                        <button type="button" class="btn btn-info px-4" @click="exportarPDF">
+                            <i class="bi bi-printer"></i>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -114,6 +117,12 @@
                 <option value="baja">Baja</option>
             </select>
         </div>
+        <div class="d-flex align-items-center gap-2">
+        <small>ID Empleado:</small>
+        <input type="number" v-model="filtroEmpleadoId" 
+                class="form-control form-control-sm" 
+                placeholder="Buscar por ID..." style="width: 120px;">
+        </div>
     </div>
 
     <div class="card-body p-0">
@@ -122,16 +131,17 @@
                 <thead class="table-primary">
                     <tr>
                         <th class="text-center">ID</th>
-                        <th>Título</th>
+                        <th class="text-center">Título</th>
                         <th class="text-center">Prioridad</th>
                         <th class="text-center">Estado</th>
-                        <th class="text-center">Usuario ID</th> <th class="text-center">Acciones</th>
+                        <th class="text-center">Usuario ID</th> 
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="tarea in tareasFiltradas" :key="tarea.id">
                         <td class="text-center fw-bold">{{ tarea.id }}</td>
-                        <td>{{ tarea.titulo }}</td>
+                        <td class="text-center">{{ tarea.titulo }}</td>
                         <td class="text-center">
                             <span class="badge" :class="badgePrioridad(tarea.prioridad)">
                                 {{ tarea.prioridad }}
@@ -144,14 +154,22 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            </td>
+                                    <button @click="selTarea(tarea.id)" class="btn btn-warning btn-sm me-1"
+                                        title="Cargar en formulario">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button @click="delTarea(tarea.id)" class="btn btn-danger btn-sm"
+                                        title="Eliminar tarea">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<div class="d-flex align-items-center gap-3">
+<!--<div class="d-flex align-items-center gap-3">
     <div class="d-flex align-items-center gap-2">
         <small>Prioridad:</small>
         <select v-model="filtroPrioridad" class="form-select form-select-sm" style="width: auto;">
@@ -168,8 +186,8 @@
                class="form-control form-control-sm" 
                placeholder="Buscar por ID..." style="width: 120px;">
     </div>
-</div>
-        <div class="card shadow-sm">
+</div>-->
+        <!--<div class="card shadow-sm">
             
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
@@ -223,13 +241,15 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </div>-->
     </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
 import Swal from "sweetalert2";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { getTareas, getTareaById, addTarea, updateTarea, deleteTarea } from "../api/tareas.js";
 import { getEmpleados } from "../api/empleados.js";
 
@@ -592,6 +612,79 @@ const badgePrioridad = (prioridad) => {
         baja: 'bg-info text-dark'      // Azul clarito
     };
     return colores[prioridad] || 'bg-secondary';
+};
+
+// Exportar a PDF
+const exportarPDF = () => {
+    const doc = new jsPDF();
+
+    // Definir las columnas
+    const columnas = ["ID", "Título", "Fecha", "Descripción", "Prioridad", "Estado", "Empleado"];
+    
+    // Preparar las filas (usando tareasFiltradas para respetar filtros activos)
+    const filas = tareasFiltradas.value.map(t => [
+        t.id,
+        t.titulo,
+        formatFecha(t.fecha),
+        t.descripcion || '-',
+        formatPrioridad(t.prioridad),
+        formatEstado(t.estado),
+        obtenerNombreEmpleado(t.empleadoId) || '-'
+    ]);
+
+    // --- DISEÑO DEL ENCABEZADO ---
+    doc.setFontSize(18);
+    doc.setTextColor(13, 110, 253); // Azul Primary de Bootstrap (#0d6efd)
+    doc.text("GESTIÓN DE TAREAS", 14, 20);
+    
+    // Línea decorativa azul debajo del título
+    doc.setDrawColor(13, 110, 253);
+    doc.setLineWidth(0.5);
+    doc.line(14, 23, 60, 23);
+
+    // --- GENERACIÓN DE LA TABLA ---
+    autoTable(doc, {
+        head: [columnas],
+        body: filas,
+        startY: 30,
+        theme: 'striped', // Filas alternas con color suave
+        headStyles: {
+            fillColor: [13, 110, 253], // Azul Primary de Bootstrap
+            textColor: [255, 255, 255], // Texto blanco
+            fontSize: 10,
+            fontStyle: 'bold',
+            halign: 'center'
+        },
+        bodyStyles: {
+            fontSize: 9,
+            textColor: [51, 51, 51] // Gris oscuro para mejor lectura
+        },
+        alternateRowStyles: {
+            fillColor: [240, 247, 255] // Azul muy clarito para las filas alternas
+        },
+        columnStyles: {
+            0: { halign: 'center', fontStyle: 'bold' }, // ID centrado y negrita
+            2: { halign: 'center' }, // Fecha centrado
+            4: { halign: 'center' }, // Prioridad centrado
+            5: { halign: 'center' }  // Estado centrado
+        },
+        margin: { top: 30 },
+        // Añadir una línea de borde a la tabla
+        tableLineColor: [200, 200, 200],
+        tableLineWidth: 0.1,
+    });
+
+    // --- PIE DE PÁGINA ---
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Documento generado el: ${new Date().toLocaleDateString()}`, 14, doc.internal.pageSize.height - 10);
+        doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+    }
+
+    doc.save("Listado_Tareas.pdf");
 };
 
 </script>

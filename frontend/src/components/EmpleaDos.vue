@@ -70,8 +70,7 @@
                             Cancelar
                         </button>
                         <button type="button" class="btn btn-info px-4" @click="exportarPDF">
-                            <i class="bi bi-file-earmark-pdf me-1"></i>
-                            Imprimir
+                            <i class="bi bi-printer"></i>
                         </button>
                     </div>
                 </form>
