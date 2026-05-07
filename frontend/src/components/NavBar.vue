@@ -24,6 +24,9 @@
                         <router-link to="/tareas" class="nav-link">Tareas</router-link>
                     </li>
                     <li class="nav-item">
+                        <router-link to="/facturas" class="nav-link">Facturas</router-link>
+                    </li>
+                    <li class="nav-item">
                         <router-link to="/estadisticas" class="nav-link">Estadísticas</router-link>
                     </li>
                     <li class="nav-item">

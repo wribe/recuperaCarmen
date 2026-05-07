@@ -25,6 +25,9 @@
       "estado": "finalizada",
       "prioridad": "alta",
       "empleadoId": 2,
+      "horas": 2,
+      "precioHora": 50,
+      "total": 100,
       "id": 1
     },
     {
@@ -34,7 +37,47 @@
       "estado": "en_proceso",
       "prioridad": "baja",
       "empleadoId": 1,
+      "horas": 1,
+      "precioHora": 30,
+      "total": 30,
       "id": 2
+    },
+    {
+      "titulo": "Hola Martuki",
+      "fecha": "2026-05-07",
+      "descripcion": "",
+      "estado": "pendiente",
+      "prioridad": "baja",
+      "empleadoId": null,
+      "horas": 1,
+      "precioHora": 0.01,
+      "total": 0.01,
+      "id": 3
+    }
+  ],
+  "facturas": [
+    {
+      "numeroFactura": "FAC-1778142804070-291",
+      "cliente": "Sebastián Collarte",
+      "fechaFactura": "2026-05-07",
+      "metodoPago": "stripe",
+      "tareas": [
+        {
+          "titulo": "Reunión Ventas",
+          "fecha": "2026-04-08",
+          "descripcion": "Análisis ventas del primer trimestre",
+          "estado": "finalizada",
+          "prioridad": "alta",
+          "empleadoId": 2,
+          "horas": 2,
+          "precioHora": 50,
+          "total": 100,
+          "id": 1
+        }
+      ],
+      "total": 100,
+      "fechaCreacion": "2026-05-07T08:33:24.070Z",
+      "id": 1
     }
   ]
 }

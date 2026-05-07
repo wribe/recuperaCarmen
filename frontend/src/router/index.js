@@ -5,6 +5,7 @@ import TareaS from "../components/TareaS.vue";
 import EstadisTicas from "../components/EstadisTicas.vue";
 import AbouT from "../components/AbouT.vue";
 import AvisoLegal from "../components/AvisoLegal.vue";
+import Facturas from "../components/FactuRas.vue";
 import NotFound from "../components/NotFound.vue";
 
 const routes = [
@@ -27,6 +28,11 @@ const routes = [
         path: "/estadisticas",
         name: "EstadisTicas",
         component: EstadisTicas
+    },
+    {
+        path: "/facturas",
+        name: "Facturas",
+        component: Facturas
     },
     {
         path: "/about",

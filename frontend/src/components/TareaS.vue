@@ -31,6 +31,30 @@
                                 placeholder="ID" min="1" />
                         </div>
 
+                        <!-- Horas -->
+                        <div class="col-md-3">
+                            <label for="horas" class="form-label fw-semibold">Horas: <span class="text-danger">*</span></label>
+                            <input type="number" id="horas" v-model.number="nuevaTarea.horas"
+                                class="form-control" :class="{ 'is-invalid': !horasValida }"
+                                placeholder="Ej: 5" min="0.5" step="0.5" @input="calcularTotal" />
+                            <div v-if="!horasValida" class="invalid-feedback">Las horas deben ser mayores a 0.</div>
+                        </div>
+
+                        <!-- Precio por Hora -->
+                        <div class="col-md-3">
+                            <label for="precioHora" class="form-label fw-semibold">Precio/Hora: <span class="text-danger">*</span></label>
+                            <input type="number" id="precioHora" v-model.number="nuevaTarea.precioHora"
+                                class="form-control" :class="{ 'is-invalid': !precioHoraValida }"
+                                placeholder="Ej: 50" min="0" step="0.01" @input="calcularTotal" />
+                            <div v-if="!precioHoraValida" class="invalid-feedback">El precio/hora debe ser mayor a 0.</div>
+                        </div>
+
+                        <!-- Total (Solo lectura) -->
+                        <div class="col-md-3">
+                            <label for="total" class="form-label fw-semibold">Total: <span class="text-danger">*</span></label>
+                            <input type="number" id="total" v-model.number="nuevaTarea.total"
+                                class="form-control" placeholder="Total" disabled readonly />
+                        </div>
 
                         <!-- Fecha -->
                         <div class="col-md-3">
@@ -134,7 +158,10 @@
                         <th class="text-center">Título</th>
                         <th class="text-center">Prioridad</th>
                         <th class="text-center">Estado</th>
-                        <th class="text-center">Usuario ID</th> 
+                        <th class="text-center">Usuario ID</th>
+                        <th class="text-center">Horas</th>
+                        <th class="text-center">Precio/Hora</th>
+                        <th class="text-center">Total</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -153,6 +180,9 @@
                                 {{ tarea.empleadoId ? `ID: ${tarea.empleadoId}` : 'Sin asignar' }}
                             </span>
                         </td>
+                        <td class="text-center">{{ tarea.horas }}</td>
+                        <td class="text-center">{{ tarea.precioHora }}€</td>
+                        <td class="text-center fw-bold">{{ tarea.total }}€</td>
                         <td class="text-center">
                                     <button @click="selTarea(tarea.id)" class="btn btn-warning btn-sm me-1"
                                         title="Cargar en formulario">
@@ -264,6 +294,9 @@ const nuevaTarea = reactive({
     estado: "",
     prioridad: "baja",
     empleadoId: null,
+    horas: 0,
+    precioHora: 0,
+    total: 0,
 });
 
 const editando = ref(false);
@@ -272,11 +305,19 @@ const editandoId = ref(null);
 const tituloValido = ref(true);
 const fechaValida = ref(true);
 const estadoValido = ref(true);
+const horasValida = ref(true);
+const precioHoraValida = ref(true);
+
+const calcularTotal = () => {
+    nuevaTarea.total = nuevaTarea.horas * nuevaTarea.precioHora;
+};
 
 const validarFormulario = () => {
     tituloValido.value = !!nuevaTarea.titulo.trim();
     fechaValida.value = !!nuevaTarea.fecha;
     estadoValido.value = !!nuevaTarea.estado;
+    horasValida.value = nuevaTarea.horas > 0;
+    precioHoraValida.value = nuevaTarea.precioHora > 0;
 
     if (!tituloValido.value) {
         alerta("error", "Error", "El título es obligatorio");
@@ -288,6 +329,14 @@ const validarFormulario = () => {
     }
     if (!estadoValido.value) {
         alerta("error", "Error", "El estado es obligatorio");
+        return false;
+    }
+    if (!horasValida.value) {
+        alerta("error", "Error", "Las horas deben ser mayores a 0");
+        return false;
+    }
+    if (!precioHoraValida.value) {
+        alerta("error", "Error", "El precio/hora debe ser mayor a 0");
         return false;
     }
     
@@ -353,6 +402,9 @@ const añadirTarea = async () => {
     try {
         cargando.value = true;
 
+        // Calcular el total
+        calcularTotal();
+        
         // Construimos el objeto con datos limpios
         const nuevaTareaData = {
             titulo: capitalizarPalabras(nuevaTarea.titulo.trim()),
@@ -364,6 +416,9 @@ const añadirTarea = async () => {
             // IMPORTANTE: Manejo del empleadoId para evitar errores en json-server
             // Si hay un ID, lo convertimos a número. Si no, lo dejamos como null explícito.
             empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
+            horas: parseFloat(nuevaTarea.horas) || 0,
+            precioHora: parseFloat(nuevaTarea.precioHora) || 0,
+            total: nuevaTarea.total,
         };
 
         // Enviamos a la API (tareas.js)
@@ -405,6 +460,9 @@ const selTarea = (id) => {
     nuevaTarea.estado = tarea.estado;
     nuevaTarea.prioridad = tarea.prioridad;
     nuevaTarea.empleadoId = tarea.empleadoId;
+    nuevaTarea.horas = tarea.horas || 0;
+    nuevaTarea.precioHora = tarea.precioHora || 0;
+    nuevaTarea.total = tarea.total || 0;
 
     editando.value = true;
     editandoId.value = id;
@@ -413,6 +471,8 @@ const selTarea = (id) => {
     tituloValido.value = true;
     fechaValida.value = true;
     estadoValido.value = true;
+    horasValida.value = true;
+    precioHoraValida.value = true;
 
 };
 
@@ -422,6 +482,8 @@ const actualizarTarea = async () => {
 
     try {
         cargando.value = true;
+        // Calcular el total
+        calcularTotal();
         const tareaActualizada = {
             titulo: nuevaTarea.titulo.trim(),
             fecha: nuevaTarea.fecha,
@@ -429,6 +491,9 @@ const actualizarTarea = async () => {
             estado: nuevaTarea.estado,
             prioridad: nuevaTarea.prioridad,
             empleadoId: nuevaTarea.empleadoId ? parseInt(nuevaTarea.empleadoId) : null,
+            horas: parseFloat(nuevaTarea.horas) || 0,
+            precioHora: parseFloat(nuevaTarea.precioHora) || 0,
+            total: nuevaTarea.total,
         };
 
         await updateTarea(editandoId.value, tareaActualizada);
@@ -533,6 +598,9 @@ const limpiarFormulario = () => {
     nuevaTarea.estado = "";
     nuevaTarea.prioridad = "baja";
     nuevaTarea.empleadoId = null;
+    nuevaTarea.horas = 0;
+    nuevaTarea.precioHora = 0;
+    nuevaTarea.total = 0;
 
     editando.value = false;
     editandoId.value = null;
@@ -540,6 +608,8 @@ const limpiarFormulario = () => {
     tituloValido.value = true;
     fechaValida.value = true;
     estadoValido.value = true;
+    horasValida.value = true;
+    precioHoraValida.value = true;
 };
 
 
