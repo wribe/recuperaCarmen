@@ -7,9 +7,12 @@
  * node backend/stripe-server.js
  */
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import Stripe from 'stripe';
+
+dotenv.config();
 
 const app = express();
 
@@ -25,7 +28,6 @@ let stripe = null;
 try {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (stripeKey && stripeKey !== 'sk_test_your_secret_key') {
-        const Stripe = require('stripe');
         stripe = Stripe(stripeKey);
         console.log('✓ Stripe inicializado con claves reales');
     } else {

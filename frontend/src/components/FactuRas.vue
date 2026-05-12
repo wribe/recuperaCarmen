@@ -383,109 +383,236 @@ const limpiarFormulario = () => {
 };
 
 const verDetallesFactura = (factura) => {
-    let detalles = `<div style="text-align: left;">
-        <p><strong>Nº Factura:</strong> ${factura.numeroFactura}</p>
-        <p><strong>Cliente:</strong> ${factura.cliente}</p>
-        <p><strong>Fecha:</strong> ${formatFecha(factura.fechaFactura)}</p>
-        <p><strong>Método Pago:</strong> ${formatMetodoPago(factura.metodoPago)}</p>
-        <hr>
-        <h5>Tareas Incluidas:</h5>
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #ddd;">
-                <th style="text-align: left; padding: 5px;">Tarea</th>
-                <th style="text-align: center; padding: 5px;">Horas</th>
-                <th style="text-align: center; padding: 5px;">Precio/H</th>
-                <th style="text-align: center; padding: 5px;">Total</th>
+    // Calcular totales con IVA
+    const subtotal = factura.total;
+    const iva = subtotal * 0.21;
+    const totalConIva = subtotal + iva;
+
+    let detalles = `<div style="text-align: left; font-family: Arial, sans-serif;">
+        <div style="background: #0d6efd; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 18px;">📋 FACTURA Nº ${factura.numeroFactura}</h3>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="border-right: 1px solid #ddd;">
+                <h4 style="color: #0d6efd; margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase;">📋 Datos de Facturación</h4>
+                <p style="margin: 5px 0;"><strong>Cliente:</strong> ${factura.cliente}</p>
+            </div>
+            <div>
+                <h4 style="color: #0d6efd; margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase;">📅 Información de la Factura</h4>
+                <p style="margin: 5px 0;"><strong>Fecha:</strong> ${formatFecha(factura.fechaFactura)}</p>
+                <p style="margin: 5px 0;"><strong>Método Pago:</strong> ${formatMetodoPago(factura.metodoPago)}</p>
+                <p style="margin: 5px 0;"><strong>Estado:</strong> <span style="color: #28a745;">✓ PAGADO</span></p>
+            </div>
+        </div>
+
+        <h4 style="color: #0d6efd; margin: 15px 0 10px 0; font-size: 12px; text-transform: uppercase;">Tareas Incluidas</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr style="background: #0d6efd; color: white;">
+                <th style="text-align: left; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Tarea</th>
+                <th style="text-align: center; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Horas</th>
+                <th style="text-align: right; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Precio/H</th>
+                <th style="text-align: right; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total</th>
             </tr>`;
 
     factura.tareas.forEach(t => {
         detalles += `<tr style="border-bottom: 1px solid #ddd;">
-            <td style="padding: 5px;">${t.titulo}</td>
-            <td style="text-align: center; padding: 5px;">${t.horas}</td>
-            <td style="text-align: center; padding: 5px;">${t.precioHora}€</td>
-            <td style="text-align: center; padding: 5px;">${t.total}€</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${t.titulo}</td>
+            <td style="text-align: center; padding: 8px; border: 1px solid #ddd;">${t.horas}</td>
+            <td style="text-align: right; padding: 8px; border: 1px solid #ddd;">${t.precioHora.toFixed(2)}€</td>
+            <td style="text-align: right; padding: 8px; border: 1px solid #ddd; font-weight: bold;">${t.total.toFixed(2)}€</td>
         </tr>`;
     });
 
     detalles += `</table>
-        <hr>
-        <p style="font-size: 18px; font-weight: bold; text-align: right;">
-            Total: <span style="color: #0d6efd;">${factura.total}€</span>
-        </p>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: right;">
+            <p style="margin: 8px 0;"><strong>Subtotal:</strong> <span style="font-size: 16px;">${subtotal.toFixed(2)}€</span></p>
+            <p style="margin: 8px 0;"><strong>IVA (21%):</strong> <span style="font-size: 16px;">${iva.toFixed(2)}€</span></p>
+            <hr style="margin: 10px 0; border: none; border-top: 2px solid #0d6efd;">
+            <p style="margin: 8px 0; color: #0d6efd;"><strong>TOTAL:</strong> <span style="font-size: 20px; font-weight: bold;">${totalConIva.toFixed(2)}€</span></p>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">¡Gracias por su confianza!</p>
     </div>`;
 
     Swal.fire({
         title: "Detalles de Factura",
         html: detalles,
         icon: "info",
-        confirmButtonText: "Cerrar"
+        width: '600px',
+        confirmButtonText: "Cerrar",
+        confirmButtonColor: "#0d6efd"
     });
 };
 
 const imprimirFactura = (factura) => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    const colorPrimario = [13, 110, 253];
 
-    // Encabezado
-    doc.setFillColor(13, 110, 253);
-    doc.rect(0, 0, 210, 40, 'F');
+    let yPosition = 12;
 
-    doc.setFontSize(24);
-    doc.setTextColor(255, 255, 255);
-    doc.text("FACTURA", 15, 20);
+    // ========== ENCABEZADO ==========
+    doc.setFontSize(22);
+    doc.setTextColor(13, 110, 253);
+    doc.setFont(undefined, 'bold');
+    doc.text("EMPRESA", 15, yPosition);
+    
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont(undefined, 'normal');
+    doc.text("Servicios Profesionales", 15, yPosition + 6);
+    doc.text("Ciudad | +34 XXX XXX XXX | info@empresa.com", 15, yPosition + 11);
 
-    doc.setFontSize(10);
-    doc.setTextColor(200, 200, 200);
-    doc.text(`Nº: ${factura.numeroFactura}`, 15, 30);
+    // Línea separadora
+    doc.setDrawColor(13, 110, 253);
+    doc.setLineWidth(1);
+    doc.line(15, yPosition + 15, pageWidth - 15, yPosition + 15);
 
-    // Información principal
+    yPosition += 22;
+
+    // ========== NÚMERO Y ESTADO ==========
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
-    doc.text(`Cliente: ${factura.cliente}`, 15, 55);
-    doc.text(`Fecha: ${formatFecha(factura.fechaFactura)}`, 15, 65);
-    doc.text(`Método de Pago: ${formatMetodoPago(factura.metodoPago)}`, 15, 75);
+    doc.text(`FACTURA No ${factura.numeroFactura}`, 15, yPosition);
+    
+    doc.setFontSize(9);
+    doc.setTextColor(13, 110, 253);
+    doc.setFont(undefined, 'bold');
+    doc.text("PENDIENTE", pageWidth - 35, yPosition);
 
-    // Tabla de tareas
-    const columnas = ["Tarea", "Empleado", "Horas", "Precio/H", "Total"];
+    yPosition += 12;
+
+    // ========== DATOS DE FACTURACIÓN (Izquierda) E INFORMACIÓN (Derecha) ==========
+    const colX1 = 15;
+    const colX2 = 110;
+
+    // Izquierda - Datos de Facturación
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(13, 110, 253);
+    doc.text("DATOS DE FACTURACION", colX1, yPosition);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Cliente: ${factura.cliente}`, colX1, yPosition + 6);
+    doc.text("DNI/NIF: [Agregar DNI]", colX1, yPosition + 11);
+    doc.text("Email: [Agregar email]", colX1, yPosition + 16);
+    doc.text("Telefono: [Agregar telefono]", colX1, yPosition + 21);
+    doc.text("Direccion: [Agregar direccion]", colX1, yPosition + 26);
+
+    // Derecha - Información de la Factura
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(13, 110, 253);
+    doc.text("INFORMACION DE LA FACTURA", colX2, yPosition);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Fecha: ${formatFecha(factura.fechaFactura)}`, colX2, yPosition + 6);
+    doc.text(`Metodo de Pago: ${formatMetodoPago(factura.metodoPago)}`, colX2, yPosition + 11);
+    doc.text("Estado: PAGADO", colX2, yPosition + 16);
+
+    yPosition += 35;
+
+    // ========== TABLA ==========
+    const columnas = ["Tarea/Servicio", "Horas", "Precio/H", "Subtotal"];
     const filas = factura.tareas.map(t => [
         t.titulo,
-        obtenerNombreEmpleado(t.empleadoId) || '-',
-        t.horas,
-        `${t.precioHora}€`,
-        `${t.total}€`
+        t.horas.toString(),
+        `${t.precioHora.toFixed(2)}€`,
+        `${t.total.toFixed(2)}€`
     ]);
 
     autoTable(doc, {
         head: [columnas],
         body: filas,
-        startY: 85,
-        theme: 'striped',
+        startY: yPosition,
+        theme: 'grid',
         headStyles: {
-            fillColor: [13, 110, 253],
+            fillColor: colorPrimario,
             textColor: [255, 255, 255],
-            fontSize: 10,
+            fontSize: 9,
             fontStyle: 'bold',
+            halign: 'center',
+            lineColor: [13, 110, 253]
         },
         bodyStyles: {
-            fontSize: 9,
-            textColor: [51, 51, 51]
+            fontSize: 8,
+            textColor: [51, 51, 51],
+            lineColor: [200, 200, 200]
         },
         columnStyles: {
-            2: { halign: 'center' },
-            3: { halign: 'center' },
-            4: { halign: 'center', fontStyle: 'bold' }
+            0: { halign: 'left' },
+            1: { halign: 'center' },
+            2: { halign: 'right' },
+            3: { halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: 15, right: 15 },
+        didDrawPage: function(data) {
+            yPosition = data.cursor.y;
         }
     });
 
-    // Total final
-    const finalY = doc.internal.pageSize.height - 60;
-    doc.setFontSize(12);
-    doc.setTextColor(13, 110, 253);
-    doc.text(`TOTAL: ${factura.total}€`, 15, finalY);
+    yPosition = doc.internal.pageSize.height - 60;
 
-    // Pie de página
-    doc.setFontSize(8);
+    // ========== TOTALES ==========
+    const subtotal = factura.total;
+    const iva = subtotal * 0.21;
+    const total = subtotal + iva;
+
+    const totalX = pageWidth - 45;
+
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(totalX - 30, yPosition, pageWidth - 15, yPosition);
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+
+    yPosition += 5;
+    doc.text("Subtotal:", totalX, yPosition, { align: 'right' });
+    doc.text(`${subtotal.toFixed(2)}€`, pageWidth - 15, yPosition, { align: 'right' });
+
+    yPosition += 5;
+    doc.text("IVA (21%):", totalX, yPosition, { align: 'right' });
+    doc.text(`${iva.toFixed(2)}€`, pageWidth - 15, yPosition, { align: 'right' });
+
+    yPosition += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(totalX - 30, yPosition, pageWidth - 15, yPosition);
+
+    yPosition += 5;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(13, 110, 253);
+    doc.text("TOTAL:", totalX, yPosition, { align: 'right' });
+    doc.text(`${total.toFixed(2)}€`, pageWidth - 15, yPosition, { align: 'right' });
+
+    yPosition += 12;
+
+    // ========== MENSAJE ==========
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(13, 110, 253);
+    doc.text("Gracias por su confianza", 15, yPosition, { align: 'left' });
+
+    // ========== PIE ==========
+    doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
-    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 15, doc.internal.pageSize.height - 10);
+    doc.setFont(undefined, 'normal');
+    doc.text("EMPRESA S.L. | CIF: B-XXXXXXXX | Registro Mercantil de Pontevedra", 15, pageHeight - 8);
+    doc.text(`Documento generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`, 15, pageHeight - 4);
 
     doc.save(`Factura_${factura.numeroFactura}.pdf`);
 };
@@ -528,51 +655,105 @@ const eliminarFactura = async (id) => {
 
 const exportarFacturasAPDF = () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    const colorPrimario = [13, 110, 253];
 
-    // Encabezado
-    doc.setFillColor(13, 110, 253);
-    doc.rect(0, 0, 210, 30, 'F');
+    let yPosition = 10;
 
+    // ========== ENCABEZADO ==========
+    doc.setFontSize(24);
+    doc.setTextColor(13, 110, 253);
+    doc.setFont(undefined, 'bold');
+    doc.text("🏢 EMPRESA", 15, yPosition);
+    
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont(undefined, 'normal');
+    doc.text("Servicios Profesionales", 15, yPosition + 7);
+    
+    // Información de contacto
+    doc.setFontSize(8);
+    doc.text("📍 Ciudad | 📞 +34 XXX XXX XXX | ✉️ info@empresa.com", 15, yPosition + 14);
+
+    // Línea separadora
+    doc.setDrawColor(13, 110, 253);
+    doc.setLineWidth(0.5);
+    doc.line(15, yPosition + 18, pageWidth - 15, yPosition + 18);
+
+    yPosition += 25;
+
+    // ========== TÍTULO ==========
     doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.text("LISTADO DE FACTURAS", 15, 18);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(13, 110, 253);
+    doc.text("LISTADO DE FACTURAS", 15, yPosition);
 
-    // Tabla
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Generado: ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`, 15, yPosition + 6);
+
+    yPosition += 12;
+
+    // ========== TABLA DE FACTURAS ==========
     const columnas = ["Nº Factura", "Cliente", "Fecha", "Nº Tareas", "Total", "Método"];
     const filas = facturas.value.map(f => [
         f.numeroFactura,
         f.cliente,
         formatFecha(f.fechaFactura),
-        f.tareas.length,
-        `${f.total}€`,
+        f.tareas.length.toString(),
+        `${(f.total * 1.21).toFixed(2)}€`, // Con IVA
         formatMetodoPago(f.metodoPago)
     ]);
 
     autoTable(doc, {
         head: [columnas],
         body: filas,
-        startY: 40,
+        startY: yPosition,
         theme: 'striped',
         headStyles: {
-            fillColor: [13, 110, 253],
+            fillColor: colorPrimario,
             textColor: [255, 255, 255],
             fontSize: 9,
             fontStyle: 'bold',
+            halign: 'center'
         },
         bodyStyles: {
             fontSize: 8,
             textColor: [51, 51, 51]
-        }
+        },
+        columnStyles: {
+            0: { halign: 'center', cellWidth: 25 },
+            1: { halign: 'left' },
+            2: { halign: 'center', cellWidth: 20 },
+            3: { halign: 'center', cellWidth: 15 },
+            4: { halign: 'right', cellWidth: 20 },
+            5: { halign: 'center', cellWidth: 25 }
+        },
+        margin: { left: 15, right: 15 }
     });
 
-    // Pie de página
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 15, doc.internal.pageSize.height - 10);
-    }
+    // ========== RESUMEN FINAL ==========
+    const sumaTotalFacturas = facturas.value.reduce((sum, f) => sum + (f.total * 1.21), 0);
+    
+    yPosition = doc.lastAutoTable.finalY + 15;
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(13, 110, 253);
+    doc.text(`TOTAL DE TODAS LAS FACTURAS: ${sumaTotalFacturas.toFixed(2)}€`, pageWidth - 15, yPosition, { align: 'right' });
+
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Total de facturas: ${facturas.value.length}`, 15, yPosition);
+
+    // ========== PIE DE PÁGINA ==========
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text("EMPRESA S.L. | CIF: B-XXXXXXXX | Registro Mercantil", 15, pageHeight - 8);
 
     doc.save("Listado_Facturas.pdf");
 };
