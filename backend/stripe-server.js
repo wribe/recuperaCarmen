@@ -48,7 +48,7 @@ app.get('/health', (req, res) => {
 
 /**
  * Crear sesión de checkout
- */
+
 app.post('/create-checkout-session', async (req, res) => {
     const { factura, amount, currency } = req.body;
 
@@ -115,7 +115,42 @@ app.post('/create-checkout-session', async (req, res) => {
         });
     }
 });
+*/
+app.post('/create-checkout-session', async (req, res) => {
+    const { factura, amount, currency } = req.body;
 
+    try {
+        // FUERZA SIEMPRE EL USO DE STRIPE REAL
+        if (!stripe) {
+            throw new Error('Stripe no está configurado. Revisa tu archivo .env y la clave STRIPE_SECRET_KEY');
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: currency || 'eur',
+                    product_data: {
+                        name: factura.numeroFactura || 'Factura',
+                        description: `Factura para ${factura.cliente}`,
+                    },
+                    unit_amount: amount, 
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            // ASEGÚRATE DE QUE ESTAS URLS SON CORRECTAS
+            success_url: `http://localhost:5173/facturas?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://localhost:5173/facturas?canceled=true`,
+        });
+
+        res.json({ id: session.id }); // Devuelve solo el ID que espera el frontend
+
+    } catch (error) {
+        console.error('❌ Error real de Stripe:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
 /**
  * Verificar pago
  */
