@@ -1,3 +1,236 @@
+import express from 'express';
+import cors from 'cors';
+import 'dotenv/config'; // Carga las variables del .env de forma automática y segura
+import Stripe from 'stripe';
+
+const app = express();
+
+// Middleware de CORS - Configurado para admitir tus puertos locales de Vue/React
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Inicialización de Stripe usando la variable correcta de tu .env
+let stripeInstance = null;
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+if (stripeKey && stripeKey.trim() !== '') {
+    try {
+        stripeInstance = new Stripe(stripeKey);
+        console.log('✓ [Stripe] Inicializado con CLAVES REALES de producción/prueba.');
+    } catch (e) {
+        console.log('⚠ [Stripe] Error al inicializar con la clave del .env. Usando modo simulación.');
+    }
+} else {
+    console.log('⚠ [Stripe] Sin clave válida en .env. Ejecutando en MODO SIMULACIÓN de seguridad.');
+}
+
+// ========================= RUTAS =========================
+
+// Ruta de control (Health check)
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Servidor Stripe funcionando' });
+});
+
+// Ruta principal para crear la sesión de pago
+app.post('/create-checkout-session', async (req, res) => {
+    console.log("\n=========================================");
+    console.log("¡PETICIÓN DE PAGO RECIBIDA EN EL BACKEND!");
+    console.log("=========================================");
+
+    const { factura, amount, currency } = req.body;
+
+    // Validación preventiva de datos procedentes del frontend
+    if (!factura) {
+        console.error("❌ Error: Estás llamando al backend sin enviar los datos de la factura.");
+        return res.status(400).json({ error: "Faltan los datos de la factura." });
+    }
+
+    try {
+        // CASO A: Procesar pago real conectado con Stripe
+        if (stripeInstance) {
+            console.log(`📝 Conectando con Stripe para factura: ${factura.numeroFactura || 'Sin número'}`);
+            
+            const session = await stripeInstance.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{
+                    price_data: {
+                        currency: currency || 'eur',
+                        product_data: {
+                            name: factura.numeroFactura || 'Factura de Venta',
+                            description: `Factura para ${factura.cliente || 'Cliente'}`,
+                        },
+                        unit_amount: amount, // Recuerda: enviarlo en céntimos (ej: 10€ = 1000)
+                    },
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                success_url: `http://localhost:5173/facturas?success=true&session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `http://localhost:5173/facturas?canceled=true`,
+            });
+
+            console.log(`✓ Sesión real de Stripe generada con éxito: ${session.id}`);
+            // Devolvemos el ID y la URL para que el frontend pueda redirigir correctamente
+            return res.json({ id: session.id, url: session.url });
+        }
+
+        // CASO B: Modo simulación automático (Si no hay claves configuradas en el .env)
+        console.log(`⚠ Simulando pasarela para la factura: ${factura.numeroFactura || 'Sin número'}`);
+        const simulatedSession = {
+            id: `cs_test_${Date.now()}`,
+            payment_status: 'unpaid',
+            url: `https://checkout.stripe.com/pay/simulated_${Date.now()}`,
+            amount_total: amount,
+            currency: currency || 'eur'
+        };
+
+        console.log(`✓ Respuesta simulada enviada al Frontend con éxito.`);
+        return res.json(simulatedSession);
+
+    } catch (error) {
+        console.error('❌ Error detectado en la ruta /create-checkout-session:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Inicialización del servidor en el puerto 3001
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log('\n🚀 =========================================');
+    console.log(`   SERVIDOR OPERATIVO EN http://localhost:${PORT}`);
+    console.log('========================================= \n');
+});
+
+
+
+
+
+/**
+ * Servidor backend para procesar pagos con Stripe
+ * Puerto: 3001
+ * * Para ejecutar:
+ * npm install express cors dotenv stripe
+ * node backend/stripe-server.js
+ */
+
+/**
+ * Servidor backend para procesar pagos con Stripe
+ * Puerto: 3001
+
+
+import express from 'express';
+import cors from 'cors';
+//import dotenv from 'dotenv';
+import dotenv from 'dotenv';
+import Stripe from 'stripe';
+
+dotenv.config();
+
+const app = express();
+
+// Middleware de CORS - Configurado para admitir tus puertos locales
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Inicialización segura de Stripe
+let stripeInstance = null;
+const stripeKey = process.env.VITE_STRIPE_SECRET_KEY;
+
+if (stripeKey && stripeKey !== ) {
+    try {
+        stripeInstance = new Stripe(stripeKey);
+        console.log('✓ [Stripe] Inicializado con claves reales.');
+    } catch (e) {
+        console.log('⚠ [Stripe] Error al inicializar con la clave del .env. Usando modo simulación.');
+    }
+} else {
+    console.log('⚠ [Stripe] Sin clave válida en .env. Ejecutando en MODO SIMULACIÓN de seguridad.');
+}
+
+// ========================= RUTAS =========================
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Servidor Stripe funcionando' });
+});
+
+app.post('/create-checkout-session', async (req, res) => {
+    console.log("\n=========================================");
+    console.log("¡SOY EL ARCHIVO NUMERO 2 Y RECIBÍ LA PETICIÓN!");
+    console.log("=========================================");
+
+    const { factura, amount, currency } = req.body;
+
+    // Validación preventiva de datos procedentes de Vue
+    if (!factura) {
+        console.error("❌ Error: Estás llamando al backend sin enviar los datos de la factura.");
+        return res.status(400).json({ error: "Faltan los datos de la factura." });
+    }
+
+    try {
+        // CASO A: Procesar pago real con los servidores de Stripe
+        if (stripeInstance) {
+            console.log(`📝 Conectando con Stripe para factura: ${factura.numeroFactura}`);
+            const session = await stripeInstance.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{
+                    price_data: {
+                        currency: currency || 'eur',
+                        product_data: {
+                            name: factura.numeroFactura || 'Factura de Venta',
+                            description: `Factura para ${factura.cliente || 'Cliente'}`,
+                        },
+                        unit_amount: amount, 
+                    },
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                success_url: `http://localhost:5173/facturas?success=true&session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `http://localhost:5173/facturas?canceled=true`,
+            });
+
+            console.log(`✓ Sesión real de Stripe generada: ${session.id}`);
+            return res.json({ id: session.id, url: session.url });
+        }
+
+        // CASO B: Modo simulación automático (Evita el Error 500 si no hay claves)
+        console.log(`⚠ Simulando pasarela para la factura: ${factura.numeroFactura}`);
+        const simulatedSession = {
+            id: `cs_test_${Date.now()}`,
+            payment_status: 'unpaid',
+            // URL ficticia para que Vue pueda redirigir sin romper el flujo de la app
+            url: `https://checkout.stripe.com/pay/simulated_${Date.now()}`,
+            amount_total: amount,
+            currency: currency || 'eur'
+        };
+
+        console.log(`✓ Respuesta simulada enviada al Frontend con éxito.`);
+        return res.json(simulatedSession);
+
+    } catch (error) {
+        console.error('❌ Error detectado en la ruta:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log('\n🚀 =========================================');
+    console.log(`   SERVIDOR OPERATIVO EN http://localhost:${PORT}`);
+    console.log('========================================= \n');
+});
+
+
+
+
+
+
+
+
 /**
  * Servidor backend para procesar pagos con Stripe
  * Puerto: 3001
@@ -5,7 +238,7 @@
  * Para ejecutar:
  * npm install express cors dotenv stripe
  * node backend/stripe-server.js
- */
+
 
 import express from 'express';
 import cors from 'cors';
@@ -26,8 +259,8 @@ app.use(express.json());
 // Importar Stripe (opcional si tienes claves reales)
 let stripe = null;
 try {
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    if (stripeKey && stripeKey !== 'sk_test_your_secret_key') {
+    const stripeKey = process.env.VITE_STRIPE_SECRET_KEY;
+    if (stripeKey && stripeKey !== ) {
         stripe = Stripe(stripeKey);
         console.log('✓ Stripe inicializado con claves reales');
     } else {
@@ -41,7 +274,7 @@ try {
 
 /**
  * Health check
- */
+
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Servidor Stripe funcionando' });
 });
@@ -115,8 +348,9 @@ app.post('/create-checkout-session', async (req, res) => {
         });
     }
 });
-*/
+
 app.post('/create-checkout-session', async (req, res) => {
+    console.log("¡SOY EL ARCHIVO NUMERO 2!");
     const { factura, amount, currency } = req.body;
 
     try {
@@ -153,7 +387,7 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 /**
  * Verificar pago
- */
+
 app.post('/verify-payment', async (req, res) => {
     const { sessionId } = req.body;
 
@@ -187,7 +421,7 @@ app.post('/verify-payment', async (req, res) => {
 
 /**
  * Webhook de Stripe (para confirmación real de pagos)
- */
+
 app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     
@@ -226,7 +460,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) =
 
 /**
  * Información del servidor
- */
+
 app.get('/info', (req, res) => {
     res.json({
         name: 'Servidor Stripe',
@@ -271,3 +505,4 @@ process.on('uncaughtException', (error) => {
     console.error('❌ Excepción no capturada:', error);
     process.exit(1);
 });
+*/

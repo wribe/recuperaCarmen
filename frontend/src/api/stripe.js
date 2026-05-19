@@ -5,7 +5,7 @@
 // 3. Su clave secreta en el backend
 
 // IMPORTANTE: Reemplaza 'pk_test_YOUR_PUBLIC_KEY' con tu clave pública de Stripe
-const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_your_public_key_here';
+const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
 
 export const stripeConfig = {
     publicKey: STRIPE_PUBLIC_KEY,

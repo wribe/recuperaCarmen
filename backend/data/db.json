@@ -78,6 +78,52 @@
       "total": 100,
       "fechaCreacion": "2026-05-07T08:33:24.070Z",
       "id": 1
+    },
+    {
+      "numeroFactura": "FAC-1779180148629-275",
+      "cliente": "Carmen",
+      "fechaFactura": "2026-05-19",
+      "metodoPago": "stripe",
+      "tareas": [
+        {
+          "titulo": "Reunión Ventas",
+          "fecha": "2026-04-08",
+          "descripcion": "Análisis ventas del primer trimestre",
+          "estado": "finalizada",
+          "prioridad": "alta",
+          "empleadoId": 2,
+          "horas": 2,
+          "precioHora": 50,
+          "total": 100,
+          "id": 1
+        }
+      ],
+      "total": 100,
+      "fechaCreacion": "2026-05-19T08:42:28.629Z",
+      "id": 2
+    },
+    {
+      "numeroFactura": "FAC-1779180192428-842",
+      "cliente": "Carmen",
+      "fechaFactura": "2026-05-19",
+      "metodoPago": "transferencia",
+      "tareas": [
+        {
+          "titulo": "Reunión Ventas",
+          "fecha": "2026-04-08",
+          "descripcion": "Análisis ventas del primer trimestre",
+          "estado": "finalizada",
+          "prioridad": "alta",
+          "empleadoId": 2,
+          "horas": 2,
+          "precioHora": 50,
+          "total": 100,
+          "id": 1
+        }
+      ],
+      "total": 100,
+      "fechaCreacion": "2026-05-19T08:43:12.428Z",
+      "id": 3
     }
   ]
 }

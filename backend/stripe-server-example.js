@@ -10,7 +10,7 @@
  *    STRIPE_SECRET_KEY=sk_test_your_secret_key
  *    PORT=3001
  * 3. node stripe-server.js
- */
+ 
 
 // ============================================
 // OPCIÓN 1: USANDO EXPRESS.JS (Recomendado)
@@ -29,6 +29,7 @@ app.use(express.json());
 
 // Endpoint para crear sesión de checkout
 app.post('/create-checkout-session', async (req, res) => {
+    console.log("¡SOY EL ARCHIVO NUMERO 1!");
     const { factura, amount, currency } = req.body;
 
     try {
