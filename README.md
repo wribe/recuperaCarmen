@@ -18,7 +18,7 @@ cd recuperaCarmen
 npm install
 
 # 3. Levantar app
-npm run dev
+npm run dev, npm run server, npm run stripe -> npm start
 
 # 4. Ver en el navegador
 http://localhost:5173
@@ -27,4 +27,7 @@ http://localhost:5173
 Endpoints:
 http://localhost:3000/empleados
 http://localhost:3000/tareas
+http://localhost:3000/facturas
 
+# 6. Puerto de servidor stripe -> 3001
+http://localhost:3001
