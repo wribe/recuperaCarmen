@@ -7,6 +7,7 @@ import AbouT from "../components/AbouT.vue";
 import AvisoLegal from "../components/AvisoLegal.vue";
 import Facturas from "../components/FactuRas.vue";
 import NotFound from "../components/NotFound.vue";
+import Examen from "../components/Examen.vue";
 
 const routes = [
     {
@@ -48,6 +49,11 @@ const routes = [
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: NotFound
+    },
+    {
+        path: "/examen",
+        name: "Examen",
+        component: Examen
     }
 ];
 
