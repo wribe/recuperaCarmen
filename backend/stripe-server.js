@@ -35,6 +35,7 @@ app.get('/health', (req, res) => {
 });
 
 // Ruta principal para crear la sesión de pago
+// ========================= DENTRO DE TU RUTA PRINCIPAL =========================
 app.post('/create-checkout-session', async (req, res) => {
     console.log("\n=========================================");
     console.log("¡PETICIÓN DE PAGO RECIBIDA EN EL BACKEND!");
@@ -67,21 +68,22 @@ app.post('/create-checkout-session', async (req, res) => {
                     quantity: 1,
                 }],
                 mode: 'payment',
-                success_url: `http://localhost:5173/facturas?success=true&session_id={CHECKOUT_SESSION_ID}`,
+                // MODIFICADO: Ahora además del session_id de stripe, le pegamos el id de tu factura al final
+                success_url: `http://localhost:5173/facturas?success=true&session_id={CHECKOUT_SESSION_ID}&facturaId=${factura.id}`,
                 cancel_url: `http://localhost:5173/facturas?canceled=true`,
             });
 
             console.log(`✓ Sesión real de Stripe generada con éxito: ${session.id}`);
-            // Devolvemos el ID y la URL para que el frontend pueda redirigir correctamente
             return res.json({ id: session.id, url: session.url });
         }
 
         // CASO B: Modo simulación automático (Si no hay claves configuradas en el .env)
         console.log(`⚠ Simulando pasarela para la factura: ${factura.numeroFactura || 'Sin número'}`);
+        // MODIFICADO: Cambiamos la URL simulada para que redirija directo a tu Vue con el éxito y el ID
         const simulatedSession = {
             id: `cs_test_${Date.now()}`,
             payment_status: 'unpaid',
-            url: `https://checkout.stripe.com/pay/simulated_${Date.now()}`,
+            url: `http://localhost:5173/facturas?success=true&facturaId=${factura.id}`,
             amount_total: amount,
             currency: currency || 'eur'
         };
