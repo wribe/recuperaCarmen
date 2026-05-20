@@ -298,10 +298,10 @@ const formatMetodoPago = (metodo) => {
 
 const badgeMetodoPago = (metodo) => {
     const colores = {
-        efectivo: "bg-success",
-        transferencia: "bg-info",
-        tarjeta: "bg-warning text-dark",
-        stripe: "bg-danger"
+        efectivo: "bg-success rounded-0",
+        transferencia: "bg-info rounded-0",
+        tarjeta: "bg-warning text-dark rounded-0",
+        stripe: "bg-danger rounded-0"
     };
     return colores[metodo] || "bg-secondary";
 };
@@ -309,11 +309,11 @@ const badgeMetodoPago = (metodo) => {
 // Modificado el nombre para que no colisione con el de la factura
 const badgeEstadoTarea = (estado) => {
     const colores = {
-        pendiente: "bg-danger",
-        en_proceso: "bg-warning text-dark",
-        finalizada: "bg-success"
+        pendiente: "bg-danger rounded-0",
+        en_proceso: "bg-warning text-dark rounded-0",
+        finalizada: "bg-success rounded-0"
     };
-    return colores[estado] || "bg-secondary";
+    return colores[estado] || "bg-secondary rounded-0";
 };
 
 // MÉTODOS AUXILIARES PARA EL ESTADO DE LA FACTURA
@@ -322,7 +322,7 @@ const formatEstadoFactura = (estado) => {
 };
 
 const badgeEstadoFactura = (estado) => {
-    return estado === "pagada" ? "bg-success" : "bg-danger";
+    return estado === "pagada" ? "bg-success rounded-0" : "bg-danger rounded-0";
 };
 
 const validarFormulario = () => {

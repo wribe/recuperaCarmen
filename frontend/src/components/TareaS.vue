@@ -174,7 +174,9 @@
                                 {{ tarea.prioridad }}
                             </span>
                         </td>
-                        <td class="text-center">{{ tarea.estado }}</td>
+                        <td class="text-center" >
+                            <span class="badge"  :class="badgeEstado(tarea.estado)">{{ tarea.estado }}</span>
+                        </td>
                         <td class="text-center">
                             <span class="badge bg-light text-dark border">
                                 {{ tarea.empleadoId ? `ID: ${tarea.empleadoId}` : 'Sin asignar' }}
@@ -635,8 +637,8 @@ const formatEstado = (estado) => {
 
 
 const badgeEstado = (estado) => {
-    const colores = { pendiente: "bg-danger", en_proceso: "bg-warning text-dark", finalizada: "bg-success" };
-    return colores[estado] || "bg-secondary";
+    const colores = { pendiente: "bg-danger rounded-0", en_proceso: "bg-warning text-dark rounded-0", finalizada: "bg-success rounded-0" };
+    return colores[estado] || "bg-secondary rounded-0";
 };
 
 // Prioridad → texto
